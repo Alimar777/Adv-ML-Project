@@ -10,32 +10,37 @@ from PIL import Image
 # Load BLIP model and processor
 device = "cuda" if torch.cuda.is_available() else "cpu"
 processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(device)
+
+# Download necessary NLTK resources
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('punkt_tab')
 
-model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(device)
-
-interval = 1  # Capture frame every 1 second
-
-# Function to extract frames from a video at intervals
-def extract_frames(video_path, interval=interval):
+# Function to detect scenes using histogram differences
+def detect_scenes(video_path, threshold=0.5):
     cap = cv2.VideoCapture(video_path)
-    frames = []
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-    frame_interval = interval * fps  # Capture every 'interval' seconds
+    prev_hist = None
+    scene_frames = []
 
-    frame_count = 0
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
-        if frame_count % frame_interval == 0:
-            frames.append(frame)
-        frame_count += 1
+
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
+        hist = cv2.normalize(hist, hist).flatten()
+
+        if prev_hist is not None:
+            diff = cv2.compareHist(prev_hist, hist, cv2.HISTCMP_CORREL)
+            if diff < threshold:  # Significant scene change
+                scene_frames.append(frame)
+
+        prev_hist = hist
 
     cap.release()
-    return frames
+    return scene_frames
 
 # Function to generate captions
 def generate_caption(image):
@@ -46,31 +51,27 @@ def generate_caption(image):
 
 # Function to summarize captions
 def summarize_captions(captions):
-    # Tokenize words and count occurrences
     words = nltk.word_tokenize(" ".join(captions))
-    word_freq = Counter(words)
-
-    # Remove common words (stopwords)
     stopwords = set(nltk.corpus.stopwords.words("english"))
     filtered_words = [word for word in words if word.lower() not in stopwords]
+    word_freq = Counter(filtered_words)
 
-    # Find key themes based on word frequency
-    important_words = [word for word, freq in word_freq.items() if freq > 1 and word.lower() not in stopwords]
-    
-    # Use Hugging Face summarization model (optional)
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=device)
-    summary = summarizer(" ".join(captions), max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
+    important_words = [word for word, freq in word_freq.items() if freq > 1]
+
+    # Use Hugging Face summarization model
+    summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=0 if torch.cuda.is_available() else -1)
+    summary = summarizer(" ".join(captions), max_length=30, min_length=15, do_sample=False)[0]["summary_text"]
 
     return summary
 
 # Process video
 video_path = os.path.join(VIDEO_PATH, '03.mp4')  # Ensure correct path
-frames = extract_frames(video_path, interval)
+scene_frames = detect_scenes(video_path)
 
 captions = []  # Store captions
 
-# Generate captions and display resized frames
-for i, frame in enumerate(frames):
+# Generate captions only for key scenes
+for i, frame in enumerate(scene_frames):
     caption = generate_caption(frame)
     captions.append(caption)
 
@@ -78,16 +79,16 @@ for i, frame in enumerate(frames):
     height, width, _ = frame.shape
     resized_frame = cv2.resize(frame, (width // 4, height // 4))
 
-    # Display the resized frame with caption overlay
+    # Overlay caption on resized frame
     cv2.putText(resized_frame, caption, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
-    cv2.imshow(f"Frame {i+1}", resized_frame)
-    print(f"Frame {i+1}: {caption}")
+    cv2.imshow(f"Scene {i+1}", resized_frame)
+    print(f"Scene {i+1}: {caption}")
 
-    # Wait for key press to proceed to the next frame (press any key to continue)
+    # Wait for key press to proceed to the next scene
     cv2.waitKey(0)
-    cv2.destroyAllWindows()  # Close the previous frame window
+    cv2.destroyAllWindows()
 
-# Summarize captions to avoid redundancy
+# Summarize final captions
 final_summary = summarize_captions(captions)
 print("\n=== Final Video Summary ===")
 print(final_summary)
