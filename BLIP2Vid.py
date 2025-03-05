@@ -1,6 +1,7 @@
 import cv2
 import torch
 import os
+import csv
 import nltk
 from collections import Counter
 from paths import *  # Ensure this is correctly set
@@ -10,11 +11,10 @@ from PIL import Image
 # Load BLIP model and processor
 device = "cuda" if torch.cuda.is_available() else "cpu"
 processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(device)
+
 nltk.download('punkt')
 nltk.download('stopwords')
-nltk.download('punkt_tab')
-
-model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(device)
 
 interval = 1  # Capture frame every 1 second
 
@@ -31,7 +31,7 @@ def extract_frames(video_path, interval=interval):
         if not ret:
             break
         if frame_count % frame_interval == 0:
-            frames.append(frame)
+            frames.append((frame_count, frame))  # Store frame number and frame
         frame_count += 1
 
     cap.release()
@@ -46,48 +46,70 @@ def generate_caption(image):
 
 # Function to summarize captions
 def summarize_captions(captions):
-    # Tokenize words and count occurrences
     words = nltk.word_tokenize(" ".join(captions))
     word_freq = Counter(words)
 
-    # Remove common words (stopwords)
     stopwords = set(nltk.corpus.stopwords.words("english"))
     filtered_words = [word for word in words if word.lower() not in stopwords]
 
-    # Find key themes based on word frequency
     important_words = [word for word, freq in word_freq.items() if freq > 1 and word.lower() not in stopwords]
-    
-    # Use Hugging Face summarization model (optional)
+
     summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=device)
     summary = summarizer(" ".join(captions), max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
 
     return summary
 
-# Process video
-video_path = os.path.join(VIDEO_PATH, '03.mp4')  # Ensure correct path
-frames = extract_frames(video_path, interval)
+# Define BLIP output directory
+BLIP_OUTPUT_DIR = os.path.join(VIDEO_PATH, "Output", "BLIP")  
+os.makedirs(BLIP_OUTPUT_DIR, exist_ok=True)
 
-captions = []  # Store captions
+# Process videos 01.mp4 to 10.mp4
+for i in range(1, 11):
+    video_filename = f"{i:02d}.mp4"  # Format to 2-digit numbers (01, 02, ..., 10)
+    video_path = os.path.join(VIDEO_PATH, video_filename)
 
-# Generate captions and display resized frames
-for i, frame in enumerate(frames):
-    caption = generate_caption(frame)
-    captions.append(caption)
+    if not os.path.exists(video_path):
+        print(f"Video file {video_filename} not found. Skipping...")
+        continue
 
-    # Resize frame to 25% of its original size
-    height, width, _ = frame.shape
-    resized_frame = cv2.resize(frame, (width // 4, height // 4))
+    # Create directory for this video's outputs
+    video_name = os.path.splitext(video_filename)[0]  # Extract name without extension
+    video_output_dir = os.path.join(BLIP_OUTPUT_DIR, video_name)
+    os.makedirs(video_output_dir, exist_ok=True)
 
-    # Display the resized frame with caption overlay
-    cv2.putText(resized_frame, caption, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2, cv2.LINE_AA)
-    cv2.imshow(f"Frame {i+1}", resized_frame)
-    print(f"Frame {i+1}: {caption}")
+    print(f"\nProcessing {video_filename}...\n")
 
-    # Wait for key press to proceed to the next frame (press any key to continue)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()  # Close the previous frame window
+    frames = extract_frames(video_path, interval)
 
-# Summarize captions to avoid redundancy
-final_summary = summarize_captions(captions)
-print("\n=== Final Video Summary ===")
-print(final_summary)
+    captions = []  # Store captions for summary
+    csv_data = []  # Store frame data for CSV
+
+    # Process each frame
+    for frame_number, frame in frames:
+        caption = generate_caption(frame)
+        captions.append(caption)
+
+        # Save raw frame image
+        frame_filename = f"frame_{frame_number}.jpg"
+        frame_filepath = os.path.join(video_output_dir, frame_filename)
+        cv2.imwrite(frame_filepath, frame)
+
+        # Store frame info for CSV
+        csv_data.append([frame_number, frame_filename, caption])
+
+        print(f"Frame {frame_number}: {caption}")
+
+    # Generate summary
+    final_summary = summarize_captions(captions)
+
+    # Save captions to CSV
+    csv_filename = os.path.join(video_output_dir, f"{video_name}_captions.csv")
+    with open(csv_filename, mode="w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Frame Number", "Image File", "Caption"])
+        writer.writerows(csv_data)
+        writer.writerow([])
+        writer.writerow(["Summary", final_summary])
+
+    print("\n=== Final Video Summary ===")
+    print(final_summary)
