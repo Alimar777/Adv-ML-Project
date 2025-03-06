@@ -1,16 +1,25 @@
-Frame Number,Image File,Caption
-0,frame_0.jpg,people are skating on the ice rink in front of a large building
-29,frame_29.jpg,people are skating on the ice in front of a large building
-58,frame_58.jpg,people skating on the ice rink in front of a large building
-87,frame_87.jpg,people are skating on the ice in front of a large building
-116,frame_116.jpg,people are skating on the ice in front of a large building
-145,frame_145.jpg,people are skating on the ice rink in front of a large building
-174,frame_174.jpg,people are skating on the ice rink in front of a large building
-203,frame_203.jpg,people are skating on the ice in front of a large building
-232,frame_232.jpg,people are skating on the ice in front of a large building
-261,frame_261.jpg,people are skating on the ice in front of a large building
-290,frame_290.jpg,people are skating on the ice in front of a large building
-319,frame_319.jpg,people are skating on the ice in front of a large building
-348,frame_348.jpg,people are walking in the snow near a building
+Frame Number,Image File,Caption,Processing Time (s)
+0,frame_0.jpg,people are skating on the ice rink in front of a large building,0.260059118270874
+29,frame_29.jpg,people are skating on the ice in front of a large building,0.24405527114868164
+58,frame_58.jpg,people skating on the ice rink in front of a large building,0.24305486679077148
+87,frame_87.jpg,people are skating on the ice in front of a large building,0.24305510520935059
+116,frame_116.jpg,people are skating on the ice in front of a large building,0.24405550956726074
+145,frame_145.jpg,people are skating on the ice rink in front of a large building,0.2600586414337158
+174,frame_174.jpg,people are skating on the ice rink in front of a large building,0.25905823707580566
+203,frame_203.jpg,people are skating on the ice in front of a large building,0.24405527114868164
+232,frame_232.jpg,people are skating on the ice in front of a large building,0.24405527114868164
+261,frame_261.jpg,people are skating on the ice in front of a large building,0.24405503273010254
+290,frame_290.jpg,people are skating on the ice in front of a large building,0.24305510520935059
+319,frame_319.jpg,people are skating on the ice in front of a large building,0.2430553436279297
+348,frame_348.jpg,people are walking in the snow near a building,0.19904470443725586
+
+Video Stats
+Total Frames,361
+Video Duration (s),12.448275862068966
+Mean Processing Time (s),0.24390134444603553
+Median Processing Time (s),0.24405527114868164
+Mode Processing Time (s),0.24405527114868164
+Summary Processing Time (s),0.4631047248840332
+Total Processing Time (s),3.6348228454589844
 
 Summary,People are skating on the ice rink in front of a large building. People are skating in the snow near a building.

@@ -1,15 +1,24 @@
-Frame Number,Image File,Caption
-0,frame_0.jpg,a horse walking in a fenced area
-30,frame_30.jpg,a horse walking in a fenced area
-60,frame_60.jpg,a horse walking in a fenced area
-90,frame_90.jpg,a horse walking in a fenced area
-120,frame_120.jpg,a horse running in a fenced area
-150,frame_150.jpg,a horse walking in a dirt field
-180,frame_180.jpg,a horse standing in a dirt field next to a fence
-210,frame_210.jpg,a horse standing in a dirt field next to a fence
-240,frame_240.jpg,a horse standing in a fenced area with trees
-270,frame_270.jpg,a horse is walking in a fenced area
-300,frame_300.jpg,a horse grazing in a field with trees in the background
-330,frame_330.jpg,a woman riding a horse in a field
+Frame Number,Image File,Caption,Processing Time (s)
+0,frame_0.jpg,a horse walking in a fenced area,0.20204567909240723
+30,frame_30.jpg,a horse walking in a fenced area,0.19504427909851074
+60,frame_60.jpg,a horse walking in a fenced area,0.19304370880126953
+90,frame_90.jpg,a horse walking in a fenced area,0.19304347038269043
+120,frame_120.jpg,a horse running in a fenced area,0.19404387474060059
+150,frame_150.jpg,a horse walking in a dirt field,0.1780402660369873
+180,frame_180.jpg,a horse standing in a dirt field next to a fence,0.23705387115478516
+210,frame_210.jpg,a horse standing in a dirt field next to a fence,0.23905396461486816
+240,frame_240.jpg,a horse standing in a fenced area with trees,0.22605109214782715
+270,frame_270.jpg,a horse is walking in a fenced area,0.21504831314086914
+300,frame_300.jpg,a horse grazing in a field with trees in the background,0.24405527114868164
+330,frame_330.jpg,a woman riding a horse in a field,0.20204734802246094
+
+Video Stats
+Total Frames,344
+Video Duration (s),11.466666666666667
+Mean Processing Time (s),0.2098809281984965
+Median Processing Time (s),0.20204651355743408
+Mode Processing Time (s),0.20204567909240723
+Summary Processing Time (s),0.46410346031188965
+Total Processing Time (s),2.9826745986938477
 
 Summary,"Horses are seen walking in a fenced area, grazing in a field and running in a dirt field. Horses can also be seen standing next to a fence."

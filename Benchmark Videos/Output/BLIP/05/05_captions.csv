@@ -1,13 +1,22 @@
-Frame Number,Image File,Caption
-0,frame_0.jpg,a group of people standing around a table full of food
-29,frame_29.jpg,a group of people standing around a table full of food
-58,frame_58.jpg,a group of people walking around a market
-87,frame_87.jpg,people are shopping at a fish market in india
-116,frame_116.jpg,a group of people standing around a market
-145,frame_145.jpg,a group of people standing around a table full of food
-174,frame_174.jpg,a group of people standing around a table full of food
-203,frame_203.jpg,a woman in a market
-232,frame_232.jpg,people are shopping at a fish market in india
-261,frame_261.jpg,a group of people standing around a market
+Frame Number,Image File,Caption,Processing Time (s)
+0,frame_0.jpg,a group of people standing around a table full of food,0.24105477333068848
+29,frame_29.jpg,a group of people standing around a table full of food,0.24005389213562012
+58,frame_58.jpg,a group of people walking around a market,0.19304370880126953
+87,frame_87.jpg,people are shopping at a fish market in india,0.20904779434204102
+116,frame_116.jpg,a group of people standing around a market,0.1960434913635254
+145,frame_145.jpg,a group of people standing around a table full of food,0.23905467987060547
+174,frame_174.jpg,a group of people standing around a table full of food,0.23905348777770996
+203,frame_203.jpg,a woman in a market,0.1470334529876709
+232,frame_232.jpg,people are shopping at a fish market in india,0.20804691314697266
+261,frame_261.jpg,a group of people standing around a market,0.19304370880126953
+
+Video Stats
+Total Frames,276
+Video Duration (s),9.517241379310345
+Mean Processing Time (s),0.2105475902557373
+Median Processing Time (s),0.20854735374450684
+Mode Processing Time (s),0.19304370880126953
+Summary Processing Time (s),0.26806092262268066
+Total Processing Time (s),2.3735368251800537
 
 Summary,Group of people standing around a table full of food in a fish market in india.

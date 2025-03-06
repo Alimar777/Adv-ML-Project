@@ -1,16 +1,25 @@
-Frame Number,Image File,Caption
-0,frame_0.jpg,a blurry view of a busy office
-25,frame_25.jpg,a blurry view of a busy office
-50,frame_50.jpg,a blurry view of a busy office
-75,frame_75.jpg,a blurry view of a busy office
-100,frame_100.jpg,a blurry view of a busy office
-125,frame_125.jpg,a blurry view of a busy office
-150,frame_150.jpg,a blurry view of a busy office
-175,frame_175.jpg,a blurry view of a busy office
-200,frame_200.jpg,a blurry view of a busy office
-225,frame_225.jpg,a blurry view of a busy office
-250,frame_250.jpg,a blurry view of a busy office
-275,frame_275.jpg,a blurry view of a busy office
-300,frame_300.jpg,a blurry view of a busy office
+Frame Number,Image File,Caption,Processing Time (s)
+0,frame_0.jpg,a blurry view of a busy office,0.19504404067993164
+25,frame_25.jpg,a blurry view of a busy office,0.19304394721984863
+50,frame_50.jpg,a blurry view of a busy office,0.19204306602478027
+75,frame_75.jpg,a blurry view of a busy office,0.1940443515777588
+100,frame_100.jpg,a blurry view of a busy office,0.19204306602478027
+125,frame_125.jpg,a blurry view of a busy office,0.19204330444335938
+150,frame_150.jpg,a blurry view of a busy office,0.19304347038269043
+175,frame_175.jpg,a blurry view of a busy office,0.19304370880126953
+200,frame_200.jpg,a blurry view of a busy office,0.1940441131591797
+225,frame_225.jpg,a blurry view of a busy office,0.19204330444335938
+250,frame_250.jpg,a blurry view of a busy office,0.19304418563842773
+275,frame_275.jpg,a blurry view of a busy office,0.19304275512695312
+300,frame_300.jpg,a blurry view of a busy office,0.19304394721984863
+
+Video Stats
+Total Frames,310
+Video Duration (s),12.4
+Mean Processing Time (s),0.19304363544170672
+Median Processing Time (s),0.19304370880126953
+Mode Processing Time (s),0.19304394721984863
+Summary Processing Time (s),0.6541481018066406
+Total Processing Time (s),3.1647157669067383
 
 Summary,A blurry view of a busy office is a blurry image of one of the busiest offices in the world. A busy office can be seen from many different angles. A blurry office can also be seen in a different light depending on the angle.

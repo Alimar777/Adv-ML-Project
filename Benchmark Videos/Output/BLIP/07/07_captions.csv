@@ -1,16 +1,25 @@
-Frame Number,Image File,Caption
-0,frame_0.jpg,a person playing a piano in a room
-25,frame_25.jpg,a person playing a piano in a room
-50,frame_50.jpg,a person playing a piano in a room
-75,frame_75.jpg,a person playing a piano in a room
-100,frame_100.jpg,a person playing a piano in a room
-125,frame_125.jpg,a person playing a piano in a room
-150,frame_150.jpg,a person playing a piano in a room
-175,frame_175.jpg,a man playing a piano in a room
-200,frame_200.jpg,a man playing a piano
-225,frame_225.jpg,a man playing a piano
-250,frame_250.jpg,a person playing a piano
-275,frame_275.jpg,a person playing a piano in a room
-300,frame_300.jpg,a person playing a piano in a room
+Frame Number,Image File,Caption,Processing Time (s)
+0,frame_0.jpg,a person playing a piano in a room,0.19504427909851074
+25,frame_25.jpg,a person playing a piano in a room,0.19404387474060059
+50,frame_50.jpg,a person playing a piano in a room,0.19304442405700684
+75,frame_75.jpg,a person playing a piano in a room,0.19504332542419434
+100,frame_100.jpg,a person playing a piano in a room,0.1940443515777588
+125,frame_125.jpg,a person playing a piano in a room,0.19304370880126953
+150,frame_150.jpg,a person playing a piano in a room,0.19304323196411133
+175,frame_175.jpg,a man playing a piano in a room,0.19304347038269043
+200,frame_200.jpg,a man playing a piano,0.14803385734558105
+225,frame_225.jpg,a man playing a piano,0.1490335464477539
+250,frame_250.jpg,a person playing a piano,0.14803314208984375
+275,frame_275.jpg,a person playing a piano in a room,0.19304370880126953
+300,frame_300.jpg,a person playing a piano in a room,0.19304394721984863
+
+Video Stats
+Total Frames,322
+Video Duration (s),12.88
+Mean Processing Time (s),0.1831952975346492
+Median Processing Time (s),0.19304370880126953
+Mode Processing Time (s),0.19304370880126953
+Summary Processing Time (s),0.4671058654785156
+Total Processing Time (s),2.848644733428955
 
 Summary,"A person playing a piano in a room is called a ""piano player"" A ""pianist"" is a person who plays a piano on a regular basis."
