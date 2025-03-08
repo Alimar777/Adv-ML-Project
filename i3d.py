@@ -1,28 +1,34 @@
+import cv2
 import torch
-import torchvision.models.video as models
+import os
+import csv
+import time
+import statistics
 import torchvision.transforms as transforms
-import cv2
-from pytorchvideo.models.hub import i3d_r50
 import numpy as np
-import os
-import torch
-import torchvision.transforms as T
-import cv2
-import os
+from collections import Counter
+from paths import *  # Ensure this is correctly set
+from pytorchvideo.models.hub import i3d_r50
+from torchvision.transforms import Compose, Lambda, Resize, CenterCrop, Normalize, ToTensor, ToPILImage
+from transformers import pipeline
 from PIL import Image
-from transformers import BlipProcessor, BlipForConditionalGeneration, AutoModelForCausalLM, AutoTokenizer
 
-'''This is working i3d model'''
+# Define path for I3D output
+I3D_OUTPUT_DIR = os.path.join(VIDEO_PATH, "Output", "I3D")  
+os.makedirs(I3D_OUTPUT_DIR, exist_ok=True)
 
-model = i3d_r50(pretrained=True)
+# Set up device
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"Using device: {device}")
+
+# Load I3D model
+model = i3d_r50(pretrained=True).to(device)
 model.eval()
 
-tokenizer = AutoTokenizer.from_pretrained("gpt2-xl")
-gpt_model = AutoModelForCausalLM.from_pretrained("gpt2-xl")
+# Kinetics 400 class labels for mapping predictions
+'''with open("kinetics_400_labels.txt", "r") as f:
+    kinetics_labels = [line.strip() for line in f.readlines()]'''
 
-tokenizer.pad_token = tokenizer.eos_token #specifies the type of padding for gpt (end of seq)
-
-#pulls class labels
 def load_kinetics_classes():
     import requests
     url = "https://raw.githubusercontent.com/deepmind/kinetics-i3d/master/data/label_map.txt"
@@ -31,66 +37,221 @@ def load_kinetics_classes():
     class_names = [line.split(", ") for line in class_names]
     return class_names
 
-class_names = load_kinetics_classes() #loads i3d class names from online
+# If you don't have the labels file, you can use this placeholder approach:
+# This is a snippet of the labels - in practice you'd want the full list
+#
+# if not os.path.exists("kinetics_400_labels.txt"):
+    print("Warning: kinetics_400_labels.txt not found. Using placeholder labels.")
+    '''kinetics_labels = [
+        "abseiling", "air drumming", "answering questions", "applauding", "archery", 
+        "arm wrestling", "arranging flowers", "assembling computer", "auctioning",
+        "baby waking up", "baking cookies", "balloon blowing", "bandaging", 
+        # ... and so on for all 400 classes
+    ]'''
+kinetics_labels = load_kinetics_classes()
+    # If none of the above, we'll just use class indices
 
-def vid_preprocess(video_path, output_dir, seq_frames=16):
-    video = cv2.VideoCapture(video_path) #video capture from path
-    i3d_frames = []
-    i3d_frames_batch = []
-    transform = transforms.Compose([ #to make sure its the correct size
+# Define video clip duration in seconds
+clip_duration = 8  # I3D typically works with 8-16 second clips
+
+# Transform for I3D input
+transform = Compose([
+    Lambda(lambda x: x / 255.0),
+    ToPILImage(), 
+    Resize((256, 256)),
+    CenterCrop((224, 224)),
+    #Lambda(lambda x: x.permute(3, 0, 1, 2)),  # [T, H, W, C] -> [C, T, H, W]
+    ToTensor(),
+    Normalize(mean=[0.43216, 0.394666, 0.37645], std=[0.22803, 0.22145, 0.216989]),
+])
+'''transform = transforms.Compose([ #to make sure its the correct size
         transforms.ToPILImage(),
         transforms.Resize((224,224)),
         transforms.ToTensor()
-    ])
-    interval_count = 0
-    if not video.isOpened():
-        print(f"Failed to open video file: {video_path}")
-        return
-    print(f"Successfully opened video file: {video_path}")
+    ])'''
 
-    while video.isOpened(): #keep open for all frames
-        ret, frame = video.read()
-        if not ret: #if it couldnt read the frame
-            break
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) #change from bgr to rgb color
-        frame = transform(frame) #transforms using the above trans func
-        i3d_frames.append(frame) #collect frames for i3d
+# Initialize summarizer for action summarization
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=0 if torch.cuda.is_available() else -1)
 
-        if len(i3d_frames) == seq_frames:
-            frame_tensor = torch.stack(i3d_frames) #.unsqueeze(0) #unsqueeze adds batch dim after stacking tensors
-            i3d_frames_batch.append(frame_tensor)
-            i3d_frames = []
-        interval_count+=1
-    video.release()
-    i3d_video_tensor = torch.stack(i3d_frames_batch).permute(0, 2, 1, 3, 4)# reorders to (batch, channels, frames, h, w)
-    return i3d_video_tensor
-
-def predict_actions(video_tensor):
-    print(f"shape: {video_tensor.shape}")
-    with torch.no_grad(): #no gradients bc we arent trying to train so we can save time and mem
-        outputs = model(video_tensor) #i3d model returns classes and values
-        probabilities = torch.nn.functional.softmax(outputs, dim=1) #probabililties, dim 1 is classes
-        top_probability, top_classes = probabilities.topk(10) #top 10
-    return top_probability, top_classes
-
-#Gen description
-def i3d_description(video_path, output_dir):
-    i3d_video_tensor = vid_preprocess(video_path, output_dir) #returns tensor for i3d, frames list for blip
-    if i3d_video_tensor is None:
-        return "Failed to process video."
-    probabilities, classes = predict_actions(i3d_video_tensor) #gets the class indices and probabilities
+# Function to extract clips from a video
+def extract_clips(video_path, clip_duration=clip_duration, overlap=0.5):
+    cap = cv2.VideoCapture(video_path)
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    video_duration = total_frames / fps if fps > 0 else 0  # In seconds
     
-    #cls is a pytorch obj, classes[] is our tensor of class indices, probabilities[] is our tensor list of probabilities
-    actions = [f"{class_names[cls.item()]}: {probability:.4f}" for cls, probability in zip(classes[0], probabilities[0])]
+    frames_per_clip = int(clip_duration * fps)
+    stride = int(frames_per_clip * (1 - overlap))
+    
+    clips = []
+    clip_start_frames = []
+    
+    frame_count = 0
+    current_clip = []
+    
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+            
+        if len(current_clip) < frames_per_clip:
+            # Convert BGR to RGB
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame_rgb = transform(frame_rgb)
+            current_clip.append(frame_rgb)
+            
+        if len(current_clip) == frames_per_clip:
+            #frame_tensor = torch.stack(current_clip)
+            clips.append(current_clip)
+            clip_start_frames.append(frame_count - frames_per_clip + 1)
+            
+            # For overlapping clips, remove stride frames from the beginning
+            if stride < frames_per_clip:
+                current_clip = current_clip[stride:]
+            else:
+                current_clip = []
+                
+        frame_count += 1
+    
+    cap.release()
+    print(f"Retained {len(clips)} clips and {total_frames} total frames.")
+    return clips, clip_start_frames, total_frames, video_duration, fps
+
+# Function to process clips with I3D
+def analyze_clip(clip):
+    # Convert clip to tensor and apply transformations
+    #clip_tensor = torch.tensor(clip).float()
+    #clip_tensor = transform(clip_tensor)
+    clip_tensor= torch.stack(clip).unsqueeze(0).permute(0, 2, 1, 3, 4)
+    clip_tensor = clip_tensor.to(device)  # Add batch dimension
+    
+    # Get model prediction
+    with torch.no_grad():
+        output = model(clip_tensor)
+        
+        # Get top predictions
+        probabilities = torch.nn.functional.softmax(output, dim=1)
+        top_probs, top_indices = torch.topk(probabilities, k=5)
+        top_prob, top_classes = probabilities.topk(5)
+    
+    results = []
+    for i, (prob, idx) in enumerate(zip(top_probs[0], top_indices[0])):
+        label = kinetics_labels[idx] if idx < len(kinetics_labels) else f"class_{idx}"
+        results.append((label, prob.item()))
+    actions = [f"{kinetics_labels[cls.item()]} ({prob:.2f})" for cls, prob in zip(top_classes[0], top_prob[0])]
     actions = [action.replace("['", "").replace("']", "") for action in actions]
-    return "The video shows: " + ", ".join(actions) + "."
+    print(f"The clip shows: " + ", ".join(actions) + ".")
+    return results
 
-current_dir = os.getcwd()
-current_dir2 = os.path.join(current_dir, "Documents", "UNM2025")
-video_filename = "testVid3.mp4"
-video_path = os.path.join(current_dir2, video_filename)
-output_dir = os.path.join(current_dir2, "frames")
-os.makedirs(output_dir, exist_ok=True)
-description = i3d_description(video_path, output_dir)
+# Function to summarize action descriptions
+def summarize_actions(actions):
+    start_summary_time = time.time()
+    action_text = " ".join([f"{action} ({confidence:.2f})" for action, confidence in actions])
+    summary = summarizer(action_text, max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
+    end_summary_time = time.time()
+    return summary, end_summary_time - start_summary_time
 
-print(f"description: {description}")
+# Process videos 01.mp4 to 10.mp4
+for i in range(1, 11):
+    video_filename = f"{i:02d}.mp4"
+    video_path = os.path.join(VIDEO_PATH, video_filename)
+    if not os.path.exists(video_path):
+        print(f"Video file {video_filename} not found. Skipping...")
+        continue
+
+    video_output_dir = os.path.join(I3D_OUTPUT_DIR, video_filename[:-4])
+    os.makedirs(video_output_dir, exist_ok=True)
+
+    print(f"\nProcessing {video_filename}...\n")
+
+    # Extract clips
+    clips, clip_start_frames, total_frames, video_duration, fps = extract_clips(video_path)
+    
+    if not clips:
+        print(f"No clips extracted from {video_filename}. Skipping...")
+        continue
+    
+    csv_data = []
+    clip_times = []
+    all_actions = []
+    total_start_time = time.time()
+
+    # Process each clip
+    for clip_idx, (clip, start_frame) in enumerate(zip(clips, clip_start_frames)):
+        start_time = time.time()
+        
+        # Analyze clip with I3D
+        actions = analyze_clip(clip)
+        all_actions.extend([action[0] if isinstance(action, list) else action for action, _ in actions])
+        end_time = time.time()
+        processing_time = end_time - start_time
+        clip_times.append(processing_time)
+        
+        # Calculate timestamp
+        start_sec = start_frame / fps
+        end_sec = (start_frame + len(clip)) / fps
+        
+        # Save top actions to CSV
+        for rank, (action, confidence) in enumerate(actions):
+            csv_data.append([
+                clip_idx, 
+                f"{start_sec:.2f}-{end_sec:.2f}", 
+                f"{action} ({confidence:.4f})", 
+                rank + 1,
+                processing_time
+            ])
+    
+    # Calculate time statistics
+    mean_time = statistics.mean(clip_times)
+    median_time = statistics.median(clip_times)
+    mode_time = statistics.mode(clip_times) if len(clip_times) > 1 else clip_times[0]
+    
+    # Get most common actions
+    action_counter = Counter(all_actions)
+    most_common_actions = action_counter.most_common(10)
+    
+    # Generate summary
+    action_summary = [(action, count/len(all_actions)) for action, count in most_common_actions]
+    final_summary, summary_time = summarize_actions(action_summary)
+    
+    total_end_time = time.time()
+    total_processing_time = total_end_time - total_start_time
+
+    # Save results to CSV
+    csv_filename = os.path.join(video_output_dir, f"{video_filename[:-4]}_actions.csv")
+    with open(csv_filename, mode="w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Clip Number", "Time Range (s)", "Action (Confidence)", "Rank", "Processing Time (s)"])
+        writer.writerows(csv_data)
+        writer.writerow([])
+        writer.writerow(["Video Stats"])
+        writer.writerow(["Total Frames", total_frames])
+        writer.writerow(["Video Duration (s)", video_duration])
+        writer.writerow(["FPS", fps])
+        writer.writerow(["Clips Processed", len(clips)])
+        writer.writerow(["Mean Processing Time (s)", mean_time])
+        writer.writerow(["Median Processing Time (s)", median_time])
+        writer.writerow(["Mode Processing Time (s)", mode_time])
+        writer.writerow(["Summary Processing Time (s)", summary_time])
+        writer.writerow(["Total Processing Time (s)", total_processing_time])
+        writer.writerow([])
+        writer.writerow(["Most Common Actions"])
+        for action, count in most_common_actions:
+            writer.writerow([action, count, f"{count/len(all_actions):.4f}"])
+        writer.writerow([])
+        writer.writerow(["Summary", final_summary])
+
+    print("\n=== Video Activity Summary ===")
+    print(final_summary)
+    print("\n=== Most Common Actions ===")
+    for action, count in most_common_actions:
+        print(f"{action}: {count} occurrences ({count/len(all_actions):.2%})")
+    print("\n=== Processing Time Stats ===")
+    print(f"Total Frames: {total_frames}")
+    print(f"Video Duration: {video_duration:.2f} seconds")
+    print(f"Clips Processed: {len(clips)}")
+    print(f"Mean Clip Processing Time: {mean_time:.4f} seconds")
+    print(f"Median Clip Processing Time: {median_time:.4f} seconds")
+    print(f"Mode Clip Processing Time: {mode_time:.4f} seconds")
+    print(f"Summary Processing Time: {summary_time:.4f} seconds")
+    print(f"Total Processing Time: {total_processing_time:.4f} seconds")
