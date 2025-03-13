@@ -1,25 +1,25 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a man kicking a soccer ball in a yard,0.19504380226135254
-15,frame_15.jpg,a woman in a red shirt kicking a soccer ball,0.2090470790863037
-30,frame_30.jpg,a man kicking a soccer ball in a field,0.1940441131591797
-45,frame_45.jpg,a young boy kicking a soccer ball in a field,0.20904755592346191
-60,frame_60.jpg,a man kicking a soccer ball in a field,0.19304323196411133
-75,frame_75.jpg,a man kicking a soccer ball in a field,0.1940441131591797
-90,frame_90.jpg,a woman kicking a soccer ball in a field,0.19304370880126953
-105,frame_105.jpg,a man kicking a soccer ball in a field,0.19404363632202148
-120,frame_120.jpg,a woman in a red shirt is kicking a soccer ball,0.22405076026916504
-135,frame_135.jpg,a man in a red shirt is playing frc,0.20904779434204102
-150,frame_150.jpg,a man in a red shirt is playing with a frc,0.2380533218383789
-165,frame_165.jpg,a man in a red shirt is playing frc,0.2090470790863037
-180,frame_180.jpg,a man in a red shirt is playing frc,0.21004748344421387
+0,frame_0.jpg,a man kicking a soccer ball in a yard,0.23205256462097168
+15,frame_15.jpg,a woman in a red shirt kicking a soccer ball,0.24605679512023926
+30,frame_30.jpg,a man kicking a soccer ball in a field,0.2360515594482422
+45,frame_45.jpg,a young boy kicking a soccer ball in a field,0.2510566711425781
+60,frame_60.jpg,a man kicking a soccer ball in a field,0.247056245803833
+75,frame_75.jpg,a man kicking a soccer ball in a field,0.2380537986755371
+90,frame_90.jpg,a woman kicking a soccer ball in a field,0.234053373336792
+105,frame_105.jpg,a man kicking a soccer ball in a field,0.23305320739746094
+120,frame_120.jpg,a woman in a red shirt is kicking a soccer ball,0.2670600414276123
+135,frame_135.jpg,a man in a red shirt is playing frc,0.2470552921295166
+150,frame_150.jpg,a man in a red shirt is playing with a frc,0.2780628204345703
+165,frame_165.jpg,a man in a red shirt is playing frc,0.25105762481689453
+180,frame_180.jpg,a man in a red shirt is playing frc,0.24805545806884766
 
 Video Stats
 Total Frames,182
 Video Duration (s),12.133333333333333
-Mean Processing Time (s),0.20550797535822943
-Median Processing Time (s),0.2090470790863037
-Mode Processing Time (s),0.2090470790863037
-Summary Processing Time (s),0.39709043502807617
-Total Processing Time (s),3.0686941146850586
+Mean Processing Time (s),0.2468250348017766
+Median Processing Time (s),0.2470552921295166
+Mode Processing Time (s),0.23205256462097168
+Summary Processing Time (s),0.4140934944152832
+Total Processing Time (s),3.622818946838379
 
 Summary,A young boy kicks a soccer ball in a field. A man kicks a football in a yard. A young boy plays with a ball.
