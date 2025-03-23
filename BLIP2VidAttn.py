@@ -43,32 +43,48 @@ def extract_frames(video_path, interval=interval):
     cap.release()
     return frames, total_frames, video_duration
 
-# Function to extract attention maps
-def get_attention_map(image):
+# New function: Compute attention rollout map using attentions from all layers
+def get_attention_rollout_map(image):
     image_pil = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     inputs = processor(images=image_pil, return_tensors="pt").to(device)
-
-    with torch.no_grad():
-        outputs = model.vision_model(**inputs)  # Extract vision transformer embeddings
-
-    attention = outputs.last_hidden_state  # Shape: [1, num_patches+1, hidden_dim]
-    attention = attention[:, 1:, :]  # Remove CLS token
-    attention = attention.mean(dim=-1).squeeze(0).cpu().numpy()  # Average over hidden dim
     
-    return attention  # Shape: [num_patches]
+    # Request attentions from the vision model
+    outputs = model.vision_model(**inputs, output_attentions=True)
+    attentions = outputs.attentions  # Tuple of tensors with shape [1, num_heads, num_tokens, num_tokens]
+    
+    # Average attention scores over all heads in each layer
+    att_mat = [att.mean(dim=1)[0] for att in attentions]  # Each element is [num_tokens, num_tokens]
+    
+    # Compute rollout by adding identity (residual connection) and normalizing each matrix,
+    # then multiplying them together across layers.
+    rollout = None
+    for a in att_mat:
+        a = a + torch.eye(a.size(0)).to(a.device)
+        a = a / a.sum(dim=-1, keepdim=True)
+        if rollout is None:
+            rollout = a
+        else:
+            rollout = torch.matmul(rollout, a)
+    
+    # Extract attention from the CLS token (index 0) and discard the CLS itself
+    cls_attention = rollout[0, 1:]  # Shape: [num_tokens - 1]
+    cls_attention = cls_attention.detach().cpu().numpy()  # FIXED
+
+    return cls_attention
+
 
 # Function to visualize attention on image
 def visualize_attention(image, attention_map, save_path):
     h, w, _ = image.shape
-    grid_size = int(np.sqrt(len(attention_map)))  # ViT splits image into patches
+    grid_size = int(np.sqrt(len(attention_map)))  # Assuming a square grid (ViT splits image into patches)
     
     attention_map = attention_map.reshape(grid_size, grid_size)
-    attention_map = cv2.resize(attention_map, (w, h))  # Resize to match original image
+    attention_map = cv2.resize(attention_map, (w, h))  # Resize to match the original image dimensions
 
     # Normalize attention map
-    attention_map = (attention_map - np.min(attention_map)) / (np.max(attention_map) - np.min(attention_map))
+    attention_map = (attention_map - np.min(attention_map)) / (np.max(attention_map) - np.min(attention_map) + 1e-8)
 
-    # Convert attention to heatmap
+    # Convert the normalized attention map to a heatmap and overlay it on the original image
     heatmap = cv2.applyColorMap(np.uint8(255 * attention_map), cv2.COLORMAP_JET)
     overlayed_image = cv2.addWeighted(image, 0.6, heatmap, 0.4, 0)
 
@@ -79,11 +95,12 @@ def generate_caption(image, save_attention_path):
     image_pil = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     inputs = processor(images=image_pil, return_tensors="pt").to(device)
 
+    # Generate caption
     caption_ids = model.generate(**inputs, max_new_tokens=60)
     caption = processor.decode(caption_ids[0], skip_special_tokens=True)
 
-    # Extract attention map
-    attention_map = get_attention_map(image)
+    # Extract attention rollout map and visualize it
+    attention_map = get_attention_rollout_map(image)
     visualize_attention(image, attention_map, save_attention_path)
 
     return caption
@@ -99,7 +116,7 @@ def summarize_captions(captions):
     return summary, end_summary_time - start_summary_time
 
 # Define BLIP output directory
-BLIP_OUTPUT_DIR = os.path.join(VIDEO_PATH, "Output", "BLIP")  
+BLIP_OUTPUT_DIR = os.path.join(VIDEO_PATH, "Output", "BLIP")
 os.makedirs(BLIP_OUTPUT_DIR, exist_ok=True)
 
 # Process videos 01.mp4 to 10.mp4
@@ -166,3 +183,37 @@ for i in range(1, 11):
     print(f"Mode Frame Processing Time: {mode_time:.4f} seconds")
     print(f"Summary Processing Time: {summary_time:.4f} seconds")
     print(f"Total Processing Time: {total_processing_time:.4f} seconds")
+
+
+import cv2
+import os
+
+def create_attention_video(image_folder, output_video_path, fps=30):
+    images = [img for img in os.listdir(image_folder) if img.endswith("_attention.jpg")]
+    images.sort(key=lambda x: int(x.split('_')[1]))  # Ensure correct frame order
+    
+    if not images:
+        print("No attention images found to create video.")
+        return
+    
+    first_image = cv2.imread(os.path.join(image_folder, images[0]))
+    height, width, _ = first_image.shape
+    
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for MP4 format
+    video_writer = cv2.VideoWriter(output_video_path, fourcc, fps, (width, height))
+    
+    for image in images:
+        img_path = os.path.join(image_folder, image)
+        frame = cv2.imread(img_path)
+        video_writer.write(frame)
+    
+    video_writer.release()
+    print(f"Attention video saved at: {output_video_path}")
+
+# After processing frames, generate video
+for i in range(1, 11):
+    video_filename = f"{i:02d}.mp4"
+    video_output_dir = os.path.join(BLIP_OUTPUT_DIR, video_filename[:-4])
+    attention_video_path = os.path.join(video_output_dir, f"{video_filename[:-4]}_attention.mp4")
+    
+    create_attention_video(video_output_dir, attention_video_path, fps=30)
