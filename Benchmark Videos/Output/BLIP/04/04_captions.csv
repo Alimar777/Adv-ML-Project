@@ -1,22 +1,24 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a horse walking in a fenced area,0.1288444995880127
-30,frame_30.jpg,a horse walking in a fenced area,0.1292867660522461
-60,frame_60.jpg,a horse walking in a fenced area,0.12998032569885254
-90,frame_90.jpg,a horse walking in a fenced area,0.13010883331298828
-120,frame_120.jpg,a horse running in a fenced area,0.1307985782623291
-150,frame_150.jpg,a horse walking in a dirt field,0.1164100170135498
-180,frame_180.jpg,a horse standing in a dirt field next to a fence,0.15232610702514648
-210,frame_210.jpg,a horse standing in a dirt field next to a fence,0.1519005298614502
-240,frame_240.jpg,a horse standing in a fenced area with trees,0.1452655792236328
-270,frame_270.jpg,a horse is walking in a fenced area,0.1323385238647461
-300,frame_300.jpg,a horse grazing in a field with trees in the background,0.15135526657104492
-330,frame_330.jpg,a woman riding a horse in a field,0.12262463569641113
+0,frame_0.jpg,a horse walking in a fenced area,0.1295158863067627
+30,frame_30.jpg,a horse walking in a fenced area,0.12564945220947266
+60,frame_60.jpg,a horse walking in a fenced area,0.12385320663452148
+90,frame_90.jpg,a horse walking in a fenced area,0.12304520606994629
+120,frame_120.jpg,a horse running in a fenced area,0.12261414527893066
+150,frame_150.jpg,a horse walking in a dirt field,0.11379051208496094
+180,frame_180.jpg,a horse standing in a dirt field next to a fence,0.15154790878295898
+210,frame_210.jpg,a horse standing in a dirt field next to a fence,0.15070414543151855
+240,frame_240.jpg,a horse standing in a fenced area with trees,0.1417710781097412
+270,frame_270.jpg,a horse is walking in a fenced area,0.13173794746398926
+300,frame_300.jpg,a horse grazing in a field with trees in the background,0.15110182762145996
+330,frame_330.jpg,a woman riding a horse in a field,0.12580490112304688
 
 Video Stats
 Total Frames,344
 Video Duration (s),11.466666666666667
-Mean Processing Time (s),0.13510330518086752
-Median Processing Time (s),0.1304537057876587
-Mode Processing Time (s),0.1288444995880127
-Total Processing Time (s),2.419668197631836
-Summary,A group of horses are seen walking through a fenced area and running in a dirt field.
+Mean Processing Time (s),0.1325946847597758
+Median Processing Time (s),0.12766039371490479
+Mode Processing Time (s),0.1295158863067627
+Total Processing Time (s),1.6146626472473145
+Scene Summary,a horse standing in a fenced area with trees
+Transition Pair,"('a horse walking in a fenced area', 'a horse standing in a fenced area with trees')"
+Common Noise Caption,a horse standing in a dirt field next to a fence

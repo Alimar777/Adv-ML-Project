@@ -1,26 +1,28 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a person holding an open book in their hands,0.14572381973266602
-29,frame_29.jpg,a person holding an open book in their hands,0.14679217338562012
-58,frame_58.jpg,a person holding an open book in their hands,0.14706730842590332
-87,frame_87.jpg,a person holding an open book with a quote,0.14496445655822754
-116,frame_116.jpg,a person holding an open book with a bookmark,0.15130043029785156
-145,frame_145.jpg,a person holding an open book in their hands,0.14154529571533203
-174,frame_174.jpg,a person holding a book with a page in it,0.15214109420776367
-203,frame_203.jpg,a person holding a book with a bookmark,0.1403360366821289
-232,frame_232.jpg,a person holding a book with a hand,0.13181471824645996
-261,frame_261.jpg,a person holding a book open to show the pages,0.15181946754455566
-290,frame_290.jpg,a person holding a book in their hands,0.12914729118347168
-319,frame_319.jpg,a person holding a book open to show the pages,0.14621996879577637
-348,frame_348.jpg,a person holding a book with a bookmark,0.13762497901916504
-377,frame_377.jpg,a person holding a book in their hand,0.1261608600616455
-406,frame_406.jpg,a person holding an open book with a hand,0.13605570793151855
-435,frame_435.jpg,a person holding an open book with a hand,0.13949251174926758
+0,frame_0.jpg,a person holding an open book in their hands,0.13706660270690918
+29,frame_29.jpg,a person holding an open book in their hands,0.13330626487731934
+58,frame_58.jpg,a person holding an open book in their hands,0.13281798362731934
+87,frame_87.jpg,a person holding an open book with a quote,0.13265442848205566
+116,frame_116.jpg,a person holding an open book with a bookmark,0.14240550994873047
+145,frame_145.jpg,a person holding an open book in their hands,0.1369025707244873
+174,frame_174.jpg,a person holding a book with a page in it,0.14771533012390137
+203,frame_203.jpg,a person holding a book with a bookmark,0.14182281494140625
+232,frame_232.jpg,a person holding a book with a hand,0.13209295272827148
+261,frame_261.jpg,a person holding a book open to show the pages,0.14594554901123047
+290,frame_290.jpg,a person holding a book in their hands,0.12617182731628418
+319,frame_319.jpg,a person holding a book open to show the pages,0.1467604637145996
+348,frame_348.jpg,a person holding a book with a bookmark,0.13702988624572754
+377,frame_377.jpg,a person holding a book in their hand,0.12610816955566406
+406,frame_406.jpg,a person holding an open book with a hand,0.135725736618042
+435,frame_435.jpg,a person holding an open book with a hand,0.1358036994934082
 
 Video Stats
 Total Frames,451
 Video Duration (s),15.551724137931034
-Mean Processing Time (s),0.1417628824710846
-Median Processing Time (s),0.14325487613677979
-Mode Processing Time (s),0.14572381973266602
-Total Processing Time (s),3.0588185787200928
-Summary,This article will explain how books can be held and the proper way they are held.
+Mean Processing Time (s),0.13689561188220978
+Median Processing Time (s),0.13635313510894775
+Mode Processing Time (s),0.13706660270690918
+Total Processing Time (s),2.223849296569824
+Scene Summary,a person holding a book in their hand
+Transition Pair,"('a person holding a book in their hands', 'a person holding a book in their hand')"
+Common Noise Caption,a person holding a book open to show the pages

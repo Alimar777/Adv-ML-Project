@@ -1,23 +1,25 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a man kicking a soccer ball in a yard,0.12514019012451172
-15,frame_15.jpg,a woman in a red shirt kicking a soccer ball,0.129288911819458
-30,frame_30.jpg,a man kicking a soccer ball in a field,0.11857390403747559
-45,frame_45.jpg,a young boy kicking a soccer ball in a field,0.13363218307495117
-60,frame_60.jpg,a man kicking a soccer ball in a field,0.1256115436553955
-75,frame_75.jpg,a man kicking a soccer ball in a field,0.1271655559539795
-90,frame_90.jpg,a woman kicking a soccer ball in a field,0.12766170501708984
-105,frame_105.jpg,a man kicking a soccer ball in a field,0.1282820701599121
-120,frame_120.jpg,a woman in a red shirt is kicking a soccer ball,0.1481037139892578
-135,frame_135.jpg,a man in a red shirt is playing frc,0.13411235809326172
-150,frame_150.jpg,a man in a red shirt is playing with a frc,0.14900541305541992
-165,frame_165.jpg,a man in a red shirt is playing frc,0.13056349754333496
-180,frame_180.jpg,a man in a red shirt is playing frc,0.12973833084106445
+0,frame_0.jpg,a man kicking a soccer ball in a yard,0.12603521347045898
+15,frame_15.jpg,a woman in a red shirt kicking a soccer ball,0.13011837005615234
+30,frame_30.jpg,a man kicking a soccer ball in a field,0.12003588676452637
+45,frame_45.jpg,a young boy kicking a soccer ball in a field,0.13152098655700684
+60,frame_60.jpg,a man kicking a soccer ball in a field,0.12039351463317871
+75,frame_75.jpg,a man kicking a soccer ball in a field,0.12006759643554688
+90,frame_90.jpg,a woman kicking a soccer ball in a field,0.12053108215332031
+105,frame_105.jpg,a man kicking a soccer ball in a field,0.12030982971191406
+120,frame_120.jpg,a woman in a red shirt is kicking a soccer ball,0.14068245887756348
+135,frame_135.jpg,a man in a red shirt is playing frc,0.12978649139404297
+150,frame_150.jpg,a man in a red shirt is playing with a frc,0.149078369140625
+165,frame_165.jpg,a man in a red shirt is playing frc,0.13082361221313477
+180,frame_180.jpg,a man in a red shirt is playing frc,0.13850998878479004
 
 Video Stats
 Total Frames,182
 Video Duration (s),12.133333333333333
-Mean Processing Time (s),0.13129841364347017
-Median Processing Time (s),0.129288911819458
-Mode Processing Time (s),0.12514019012451172
-Total Processing Time (s),2.5294816493988037
-Summary,A young boy kicks a soccer ball in a field. A man kicks a football in a yard.
+Mean Processing Time (s),0.12906872309171236
+Median Processing Time (s),0.12978649139404297
+Mode Processing Time (s),0.12603521347045898
+Total Processing Time (s),1.7036359310150146
+Scene Summary,a woman in a red shirt is kicking a soccer ball
+Transition Pair,"('a man kicking a soccer ball in a field', 'a woman in a red shirt is kicking a soccer ball')"
+Common Noise Caption,a man in a red shirt is playing frc

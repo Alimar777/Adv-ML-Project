@@ -1,23 +1,25 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a person playing a piano in a room,0.16244792938232422
-25,frame_25.jpg,a person playing a piano in a room,0.13326454162597656
-50,frame_50.jpg,a person playing a piano in a room,0.13409709930419922
-75,frame_75.jpg,a person playing a piano in a room,0.13250136375427246
-100,frame_100.jpg,a person playing a piano in a room,0.13090205192565918
-125,frame_125.jpg,a person playing a piano in a room,0.12926101684570312
-150,frame_150.jpg,a person playing a piano in a room,0.12720036506652832
-175,frame_175.jpg,a man playing a piano in a room,0.12715363502502441
-200,frame_200.jpg,a man playing a piano,0.09597253799438477
-225,frame_225.jpg,a man playing a piano,0.09615850448608398
-250,frame_250.jpg,a person playing a piano,0.09797072410583496
-275,frame_275.jpg,a person playing a piano in a room,0.12685108184814453
-300,frame_300.jpg,a person playing a piano in a room,0.12629175186157227
+0,frame_0.jpg,a person playing a piano in a room,0.13048267364501953
+25,frame_25.jpg,a person playing a piano in a room,0.1276099681854248
+50,frame_50.jpg,a person playing a piano in a room,0.12698984146118164
+75,frame_75.jpg,a person playing a piano in a room,0.1276259422302246
+100,frame_100.jpg,a person playing a piano in a room,0.127000093460083
+125,frame_125.jpg,a person playing a piano in a room,0.12807250022888184
+150,frame_150.jpg,a person playing a piano in a room,0.1280202865600586
+175,frame_175.jpg,a man playing a piano in a room,0.12742900848388672
+200,frame_200.jpg,a man playing a piano,0.09700942039489746
+225,frame_225.jpg,a man playing a piano,0.09718728065490723
+250,frame_250.jpg,a person playing a piano,0.09717702865600586
+275,frame_275.jpg,a person playing a piano in a room,0.12720346450805664
+300,frame_300.jpg,a person playing a piano in a room,0.12780284881591797
 
 Video Stats
 Total Frames,322
 Video Duration (s),12.88
-Mean Processing Time (s),0.12462096947890061
-Median Processing Time (s),0.12720036506652832
-Mode Processing Time (s),0.16244792938232422
-Total Processing Time (s),2.678602457046509
-Summary,A person playing a piano in a room is called a piano player. A pianist is a person who plays the piano on a regular basis.
+Mean Processing Time (s),0.12073925825265738
+Median Processing Time (s),0.12742900848388672
+Mode Processing Time (s),0.13048267364501953
+Total Processing Time (s),1.590512990951538
+Scene Summary,a person playing a piano in a room a person playing a piano in a room
+Transition Pair,"('a person playing a piano in a room', 'a person playing a piano in a room')"
+Common Noise Caption,
