@@ -1,25 +1,23 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a blurry view of a busy office,0.28206372261047363
-25,frame_25.jpg,a blurry view of a busy office,0.2800629138946533
-50,frame_50.jpg,a blurry view of a busy office,0.27506279945373535
-75,frame_75.jpg,a blurry view of a busy office,0.2710609436035156
-100,frame_100.jpg,a blurry view of a busy office,0.26806044578552246
-125,frame_125.jpg,a blurry view of a busy office,0.2720620632171631
-150,frame_150.jpg,a blurry view of a busy office,0.2740612030029297
-175,frame_175.jpg,a blurry view of a busy office,0.26806044578552246
-200,frame_200.jpg,a blurry view of a busy office,0.26606059074401855
-225,frame_225.jpg,a blurry view of a busy office,0.27006077766418457
-250,frame_250.jpg,a blurry view of a busy office,0.2630603313446045
-275,frame_275.jpg,a blurry view of a busy office,0.2610585689544678
-300,frame_300.jpg,a blurry view of a busy office,0.29306674003601074
+0,frame_0.jpg,a blurry view of a busy office,0.12986969947814941
+25,frame_25.jpg,a blurry view of a busy office,0.12778186798095703
+50,frame_50.jpg,a blurry view of a busy office,0.12847304344177246
+75,frame_75.jpg,a blurry view of a busy office,0.12979817390441895
+100,frame_100.jpg,a blurry view of a busy office,0.1256091594696045
+125,frame_125.jpg,a blurry view of a busy office,0.12251424789428711
+150,frame_150.jpg,a blurry view of a busy office,0.12374043464660645
+175,frame_175.jpg,a blurry view of a busy office,0.12330222129821777
+200,frame_200.jpg,a blurry view of a busy office,0.12208056449890137
+225,frame_225.jpg,a blurry view of a busy office,0.12258028984069824
+250,frame_250.jpg,a blurry view of a busy office,0.12434124946594238
+275,frame_275.jpg,a blurry view of a busy office,0.12667202949523926
+300,frame_300.jpg,a blurry view of a busy office,0.1257340908050537
 
 Video Stats
 Total Frames,310
 Video Duration (s),12.4
-Mean Processing Time (s),0.2726001189305232
-Median Processing Time (s),0.2710609436035156
-Mode Processing Time (s),0.26806044578552246
-Summary Processing Time (s),0.7931780815124512
-Total Processing Time (s),4.336979627609253
-
-Summary,A blurry view of a busy office is a blurry image of one of the busiest offices in the world. A busy office can be seen from many different angles. A blurry office can also be seen in a different light depending on the angle.
+Mean Processing Time (s),0.12557669786306527
+Median Processing Time (s),0.1256091594696045
+Mode Processing Time (s),0.12986969947814941
+Total Processing Time (s),3.2852466106414795
+Summary,The blurry image of a busy office is a blurry image of one of the busiest offices in the world. The blurry office can be seen from many different angles. A blurry office can also be seen in a different light depending on the angle.

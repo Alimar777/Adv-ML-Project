@@ -12,6 +12,7 @@ from config import *
 
 # Download necessary NLTK resources
 nltk.download('punkt')
+nltk.download('punkt_tab')
 
 def extract_frames(video_path, interval=1):
     """Extract frames from a video at a specified interval."""

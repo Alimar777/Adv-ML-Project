@@ -1,34 +1,32 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a woman is making flowers in a vase,1.1043877601623535
-25,frame_25.jpg,a woman arranging flowers in a flower shop,0.2740614414215088
-50,frame_50.jpg,a woman is holding a flower in her hand,0.28406381607055664
-75,frame_75.jpg,a woman is arranging flowers in a vase,0.2630596160888672
-100,frame_100.jpg,a woman is arranging flowers in a vase,0.26406145095825195
-125,frame_125.jpg,a woman is arranging flowers in a vase,0.2630579471588135
-150,frame_150.jpg,a woman is putting a flower in a vase,0.2900657653808594
-175,frame_175.jpg,a woman is sitting at a table with flowers,0.2780628204345703
-200,frame_200.jpg,a woman is cutting flowers on a table,0.27506208419799805
-225,frame_225.jpg,a woman cutting a flower with scissors,0.247056245803833
-250,frame_250.jpg,a woman is cutting flowers on a table,0.2580583095550537
-275,frame_275.jpg,a woman is cutting a piece of food,0.2580575942993164
-300,frame_300.jpg,a woman is cutting a flower with scissors,0.3160712718963623
-325,frame_325.jpg,a woman is cutting a flower with scissors,0.2740621566772461
-350,frame_350.jpg,a woman is cutting flowers on a table,0.26605987548828125
-375,frame_375.jpg,a woman is cutting a flower with scissors,0.2710607051849365
-400,frame_400.jpg,a woman is cutting a flower with scissors,0.32807397842407227
-425,frame_425.jpg,a woman is cutting flowers on a table,0.2690606117248535
-450,frame_450.jpg,a woman is cutting a flower with scissors,0.2720613479614258
-475,frame_475.jpg,a woman cutting a flower with scissors,0.2610599994659424
-500,frame_500.jpg,a woman is cutting a flower with scissors,0.29906749725341797
-525,frame_525.jpg,a woman is making flowers in a vase,0.2800638675689697
+0,frame_0.jpg,a woman is making flowers in a vase,0.5615768432617188
+25,frame_25.jpg,a woman arranging flowers in a flower shop,0.1318202018737793
+50,frame_50.jpg,a woman is holding a flower in her hand,0.1380922794342041
+75,frame_75.jpg,a woman is arranging flowers in a vase,0.12968015670776367
+100,frame_100.jpg,a woman is arranging flowers in a vase,0.12957477569580078
+125,frame_125.jpg,a woman is arranging flowers in a vase,0.1292572021484375
+150,frame_150.jpg,a woman is putting a flower in a vase,0.1418459415435791
+175,frame_175.jpg,a woman is sitting at a table with flowers,0.14002037048339844
+200,frame_200.jpg,a woman is cutting flowers on a table,0.1293165683746338
+225,frame_225.jpg,a woman cutting a flower with scissors,0.11957764625549316
+250,frame_250.jpg,a woman is cutting flowers on a table,0.13214683532714844
+275,frame_275.jpg,a woman is cutting a piece of food,0.13152647018432617
+300,frame_300.jpg,a woman is cutting a flower with scissors,0.12928390502929688
+325,frame_325.jpg,a woman is cutting a flower with scissors,0.1309528350830078
+350,frame_350.jpg,a woman is cutting flowers on a table,0.1293354034423828
+375,frame_375.jpg,a woman is cutting a flower with scissors,0.12981271743774414
+400,frame_400.jpg,a woman is cutting a flower with scissors,0.1304612159729004
+425,frame_425.jpg,a woman is cutting flowers on a table,0.13286900520324707
+450,frame_450.jpg,a woman is cutting a flower with scissors,0.1341252326965332
+475,frame_475.jpg,a woman cutting a flower with scissors,0.12197041511535645
+500,frame_500.jpg,a woman is cutting a flower with scissors,0.12934088706970215
+525,frame_525.jpg,a woman is making flowers in a vase,0.13064813613891602
 
 Video Stats
 Total Frames,528
 Video Duration (s),21.12
-Mean Processing Time (s),0.3134407346898859
-Median Processing Time (s),0.2730613946914673
-Mode Processing Time (s),1.1043877601623535
-Summary Processing Time (s),0.5721280574798584
-Total Processing Time (s),7.469825506210327
-
-Summary,A woman is arranging flowers in a vase. A woman is cutting a flower with scissors. A man is cutting flowers with a pair of scissors.
+Mean Processing Time (s),0.15060159293088046
+Median Processing Time (s),0.1305546760559082
+Mode Processing Time (s),0.5615768432617188
+Total Processing Time (s),8.714857578277588
+Summary,A woman is cutting flowers using scissors.
