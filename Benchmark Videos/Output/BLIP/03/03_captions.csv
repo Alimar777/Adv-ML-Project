@@ -1,28 +1,128 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a dog walking down a dirt road with red flowers,0.14745450019836426
-25,frame_25.jpg,a dog running down a dirt road with red flowers,0.14589214324951172
-50,frame_50.jpg,a black cat walking down a dirt path,0.12311124801635742
-75,frame_75.jpg,a person walking down a dirt road with a dog,0.14216232299804688
-100,frame_100.jpg,a man walking down a dirt path with red flowers,0.14338302612304688
-125,frame_125.jpg,a man walking down a dirt path with a backpack,0.1422572135925293
-150,frame_150.jpg,a man walking down a dirt path with a backpack,0.14241933822631836
-175,frame_175.jpg,a person walking down a dirt path with red flowers,0.14204931259155273
-200,frame_200.jpg,a person walking down a dirt path with red flowers,0.14350676536560059
-225,frame_225.jpg,a man walking down a dirt path with a backpack,0.14211678504943848
-250,frame_250.jpg,a man walking down a dirt path with a backpack,0.14236855506896973
-275,frame_275.jpg,a person walking down a dirt path with red flowers,0.1475965976715088
-300,frame_300.jpg,a man walking down a dirt path with red flowers,0.1457374095916748
-325,frame_325.jpg,a person walking down a dirt road with red flowers,0.14667797088623047
-350,frame_350.jpg,a person walking down a dirt road with red flowers,0.14878249168395996
-375,frame_375.jpg,a person walking down a dirt path with red flowers,0.1454768180847168
+0,frame_0.jpg,a dog walking down a dirt road with red flowers,0.46010327339172363
+25,frame_25.jpg,a dog running down a dirt road with red flowers,0.23705363273620605
+50,frame_50.jpg,a black cat walking down a dirt path,0.21204829216003418
+75,frame_75.jpg,a person walking down a dirt road with a dog,0.22705078125
+100,frame_100.jpg,a man walking down a dirt path with red flowers,0.22205042839050293
+125,frame_125.jpg,a man walking down a dirt path with a backpack,0.2200486660003662
+150,frame_150.jpg,a man walking down a dirt path with a backpack,0.22404980659484863
+175,frame_175.jpg,a person walking down a dirt path with red flowers,0.21904850006103516
+200,frame_200.jpg,a person walking down a dirt path with red flowers,0.21704888343811035
+225,frame_225.jpg,a man walking down a dirt path with a backpack,0.21904945373535156
+250,frame_250.jpg,a man walking down a dirt path with a backpack,0.2180488109588623
+275,frame_275.jpg,a person walking down a dirt path with red flowers,0.21704912185668945
+300,frame_300.jpg,a man walking down a dirt path with red flowers,0.2180490493774414
+325,frame_325.jpg,a person walking down a dirt road with red flowers,0.21904945373535156
+350,frame_350.jpg,a person walking down a dirt road with red flowers,0.2180485725402832
+375,frame_375.jpg,a person walking down a dirt path with red flowers,0.21904873847961426
 
 Video Stats
 Total Frames,386
 Video Duration (s),15.44
-Mean Processing Time (s),0.1431870311498642
-Median Processing Time (s),0.14344489574432373
-Mode Processing Time (s),0.14745450019836426
-Total Processing Time (s),2.3222930431365967
-Scene Summary,a person walking down a dirt road with red flowers a person walking down a dirt road with red flowers a person walking down a dirt path with red flowers
-Transition Pair,"('a person walking down a dirt path with red flowers', 'a person walking down a dirt road with red flowers')"
-Common Noise Caption,a man walking down a dirt path with a backpack
+Mean Processing Time (s),0.2354278415441513
+Median Processing Time (s),0.2190490961074829
+Mode Processing Time (s),0.21904945373535156
+Summary Processing Time (s),0.9732193946838379
+Total Processing Time (s),6.423447132110596
+
+Summary,"Summarize: 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a dog walking down a dirt road with red flowers
+Current: a dog running down a dirt road with red flowers
+Transition: the dog walks down the dirt path with a red flower 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a dog running down a dirt road with red flowers
+Current: a black cat walking down a dirt path
+Transition: the dog is running away from the cat
+.
+ (Note 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a black cat walking down a dirt path
+Current: a person walking down a dirt road with a dog
+Transition: the dog walks down the dirt trail
+.
+ (Note: 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a person walking down a dirt road with a dog
+Current: a man walking down a dirt path with red flowers
+Transition: the person who is walking with the dog is now walking 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a man walking down a dirt path with red flowers
+Current: a man walking down a dirt path with a backpack
+Transition: the man walks down the dirt road with the backpack and 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a man walking down a dirt path with a backpack
+Current: a man walking down a dirt path with a backpack
+Transition: the man walks down the dirt road with his backpack and 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a man walking down a dirt path with a backpack
+Current: a person walking down a dirt path with red flowers
+Transition: the man walks down the dirt road with the backpack and 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a person walking down a dirt path with red flowers
+Current: a person walking down a dirt path with red flowers
+Transition: the person walks down the dirt road with a red flower 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a person walking down a dirt path with red flowers
+Current: a man walking down a dirt path with a backpack
+Transition: the man walks down the dirt road with the backpack and 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a man walking down a dirt path with a backpack
+Current: a man walking down a dirt path with a backpack
+Transition: the man walks down the dirt road with his backpack and 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a man walking down a dirt path with a backpack
+Current: a person walking down a dirt path with red flowers
+Transition: the man walks down the dirt road with the backpack and 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a person walking down a dirt path with red flowers
+Current: a man walking down a dirt path with red flowers
+Transition: the man walks down the dirt road with a red flower 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a man walking down a dirt path with red flowers
+Current: a person walking down a dirt road with red flowers
+Transition: the man walks down the dirt trail with a red flower 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a person walking down a dirt road with red flowers
+Current: a person walking down a dirt road with red flowers
+Transition: the person walks down the dirt path with a red flower 
+
+Describe the visual change between the two scenes below in one concise sentence. 
+
+Previous: a person walking down a dirt road with red flowers
+Current: a person walking down a dirt path with red flowers
+Transition: the person walks down the dirt pathway with green flowers and a bag of red roses
+, and the bag is a white bag with blue flowers. (note: this is the same bag as the one in the picture above)
+:
+- a woman walking along a path in a forest with flowers in it
+(note : this bag was found in an abandoned house in rural China) - a girl walking on a road in forest
+ - the girl is wearing a skirt with white flowers on it and white flower on her skirt
+The bag contains a"

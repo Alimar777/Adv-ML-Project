@@ -1,28 +1,28 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a person holding an open book in their hands,0.13706660270690918
-29,frame_29.jpg,a person holding an open book in their hands,0.13330626487731934
-58,frame_58.jpg,a person holding an open book in their hands,0.13281798362731934
-87,frame_87.jpg,a person holding an open book with a quote,0.13265442848205566
-116,frame_116.jpg,a person holding an open book with a bookmark,0.14240550994873047
-145,frame_145.jpg,a person holding an open book in their hands,0.1369025707244873
-174,frame_174.jpg,a person holding a book with a page in it,0.14771533012390137
-203,frame_203.jpg,a person holding a book with a bookmark,0.14182281494140625
-232,frame_232.jpg,a person holding a book with a hand,0.13209295272827148
-261,frame_261.jpg,a person holding a book open to show the pages,0.14594554901123047
-290,frame_290.jpg,a person holding a book in their hands,0.12617182731628418
-319,frame_319.jpg,a person holding a book open to show the pages,0.1467604637145996
-348,frame_348.jpg,a person holding a book with a bookmark,0.13702988624572754
-377,frame_377.jpg,a person holding a book in their hand,0.12610816955566406
-406,frame_406.jpg,a person holding an open book with a hand,0.135725736618042
-435,frame_435.jpg,a person holding an open book with a hand,0.1358036994934082
+0,frame_0.jpg,a person holding an open book in their hands,0.21104836463928223
+29,frame_29.jpg,a person holding an open book in their hands,0.21204710006713867
+58,frame_58.jpg,a person holding an open book in their hands,0.20404601097106934
+87,frame_87.jpg,a person holding an open book with a quote,0.20104551315307617
+116,frame_116.jpg,a person holding an open book with a bookmark,0.2160487174987793
+145,frame_145.jpg,a person holding an open book in their hands,0.19904446601867676
+174,frame_174.jpg,a person holding a book with a page in it,0.2140488624572754
+203,frame_203.jpg,a person holding a book with a bookmark,0.20004582405090332
+232,frame_232.jpg,a person holding a book with a hand,0.19104337692260742
+261,frame_261.jpg,a person holding a book open to show the pages,0.22204852104187012
+290,frame_290.jpg,a person holding a book in their hands,0.189042329788208
+319,frame_319.jpg,a person holding a book open to show the pages,0.2230513095855713
+348,frame_348.jpg,a person holding a book with a bookmark,0.21304941177368164
+377,frame_377.jpg,a person holding a book in their hand,0.19704198837280273
+406,frame_406.jpg,a person holding an open book with a hand,0.2050461769104004
+435,frame_435.jpg,a person holding an open book with a hand,0.20604634284973145
 
 Video Stats
 Total Frames,451
 Video Duration (s),15.551724137931034
-Mean Processing Time (s),0.13689561188220978
-Median Processing Time (s),0.13635313510894775
-Mode Processing Time (s),0.13706660270690918
-Total Processing Time (s),2.223849296569824
-Scene Summary,a person holding a book in their hand
-Transition Pair,"('a person holding a book in their hands', 'a person holding a book in their hand')"
-Common Noise Caption,a person holding a book open to show the pages
+Mean Processing Time (s),0.20648401975631714
+Median Processing Time (s),0.20554625988006592
+Mode Processing Time (s),0.21104836463928223
+Summary Processing Time (s),0.6031360626220703
+Total Processing Time (s),3.9068803787231445
+
+Summary,A person holding a book with a page in it is called a page holder. A person holding an open book in their hands is known as a book holder. People holding books with a quote are known as book quotes.

@@ -1,22 +1,22 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a group of people standing around a table full of food,0.15536880493164062
-29,frame_29.jpg,a group of people standing around a table full of food,0.1529407501220703
-58,frame_58.jpg,a group of people walking around a market,0.12591862678527832
-87,frame_87.jpg,people are shopping at a fish market in india,0.13389086723327637
-116,frame_116.jpg,a group of people standing around a market,0.12299203872680664
-145,frame_145.jpg,a group of people standing around a table full of food,0.15221548080444336
-174,frame_174.jpg,a group of people standing around a table full of food,0.15215158462524414
-203,frame_203.jpg,a woman in a market,0.09404206275939941
-232,frame_232.jpg,people are shopping at a fish market in india,0.13280558586120605
-261,frame_261.jpg,a group of people standing around a market,0.12339401245117188
+0,frame_0.jpg,a group of people standing around a table full of food,0.23505306243896484
+29,frame_29.jpg,a group of people standing around a table full of food,0.23005175590515137
+58,frame_58.jpg,a group of people walking around a market,0.1850416660308838
+87,frame_87.jpg,people are shopping at a fish market in india,0.19904470443725586
+116,frame_116.jpg,a group of people standing around a market,0.18604207038879395
+145,frame_145.jpg,a group of people standing around a table full of food,0.23005199432373047
+174,frame_174.jpg,a group of people standing around a table full of food,0.2290513515472412
+203,frame_203.jpg,a woman in a market,0.13903117179870605
+232,frame_232.jpg,people are shopping at a fish market in india,0.19904494285583496
+261,frame_261.jpg,a group of people standing around a market,0.1850419044494629
 
 Video Stats
 Total Frames,276
 Video Duration (s),9.517241379310345
-Mean Processing Time (s),0.13457198143005372
-Median Processing Time (s),0.1333482265472412
-Mode Processing Time (s),0.15536880493164062
-Total Processing Time (s),1.3659820556640625
-Scene Summary,a group of people standing around a market
-Transition Pair,"('a group of people standing around a table full of food', 'a group of people standing around a market')"
-Common Noise Caption,people are shopping at a fish market in india
+Mean Processing Time (s),0.20174546241760255
+Median Processing Time (s),0.1990448236465454
+Mode Processing Time (s),0.23505306243896484
+Summary Processing Time (s),0.2580580711364746
+Total Processing Time (s),2.2755126953125
+
+Summary,Group of people standing around a table full of food in a fish market in india.
