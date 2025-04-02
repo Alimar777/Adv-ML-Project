@@ -22,7 +22,7 @@ RESET = "\033[0m"
 VIDEO_SELECTION_MODE = "single"  # Options: "all", "single"
 SELECTED_VIDEO_INDEX = 3  # Only used if VIDEO_SELECTION_MODE == "single"
 DETAIL_MODE = True  # Print captions for each frame in single mode
-SUMMARY_MODEL = "gpt2"  # Options: "bart", "gpt2", "llama"
+SUMMARY_MODEL = "tinyllama"  # Options: "bart", "gpt2", "llama", "mistral", "tinyllama", "nous"
 
 # === Prompt Engineering (for GPT2/LLaMA transitions) ===
 PROMPT_STYLE = (
@@ -42,6 +42,24 @@ interval = 1  # Capture frame every 1 second
 
 def load_summarizer():
     global tokenizer, model
+    from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+
+    def load_quantized_model(model_id):
+        quant_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4"
+        )
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        tokenizer.pad_token = tokenizer.eos_token
+        model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            quantization_config=quant_config,
+            device_map="auto"
+        )
+        return tokenizer, model
+
     if SUMMARY_MODEL == "bart":
         return pipeline("summarization", model="facebook/bart-large-cnn", device=0 if torch.cuda.is_available() else -1)
 
@@ -51,44 +69,49 @@ def load_summarizer():
         tokenizer.pad_token = tokenizer.eos_token
         model = GPT2LMHeadModel.from_pretrained("gpt2").to(device)
 
-        def summarize_gpt2(text):
-            inputs = tokenizer.encode(f"{YELLOW}Summarize:{RESET} " + text, return_tensors="pt", truncation=True).to(device)
-            attention_mask = torch.ones_like(inputs)
-            outputs = model.generate(
-                inputs,
-                attention_mask=attention_mask,
-                max_new_tokens=100,
-                num_return_sequences=1,
-                no_repeat_ngram_size=2,
-                pad_token_id=tokenizer.eos_token_id
-            )
-            return tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-        return summarize_gpt2
-
     elif SUMMARY_MODEL == "llama":
-        from transformers import AutoTokenizer, AutoModelForCausalLM
-        tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
+        from huggingface_hub import login
+        token_path = os.path.join(os.path.dirname(__file__), "hf_access_token.txt")
+        if not os.path.exists(token_path):
+            raise FileNotFoundError("Hugging Face access token file not found at hf_access_token.txt")
+        with open(token_path, "r") as f:
+            token = f.read().strip()
+        login(token)
+        tokenizer, model = load_quantized_model("meta-llama/Llama-2-7b-hf")
+
+    elif SUMMARY_MODEL == "mistral":
+        tokenizer, model = load_quantized_model("mistralai/Mistral-7B-Instruct-v0.1")
+
+    elif SUMMARY_MODEL == "tinyllama":
+        tokenizer = AutoTokenizer.from_pretrained("TinyLlama/TinyLlama-1.1B-Chat-v1.0")
         tokenizer.pad_token = tokenizer.eos_token
-        model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf").to(device)
+        model = AutoModelForCausalLM.from_pretrained("TinyLlama/TinyLlama-1.1B-Chat-v1.0").to(device)
 
-        def summarize_llama(text):
-            inputs = tokenizer.encode("Summarize: " + text, return_tensors="pt", truncation=True).to(device)
-            attention_mask = torch.ones_like(inputs)
-            outputs = model.generate(
-                inputs,
-                attention_mask=attention_mask,
-                max_new_tokens=100,
-                num_return_sequences=1,
-                no_repeat_ngram_size=2,
-                pad_token_id=tokenizer.eos_token_id
-            )
-            return tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-        return summarize_llama
+    elif SUMMARY_MODEL == "nous":
+        tokenizer, model = load_quantized_model("NousResearch/Llama-2-7b-chat-hf")
 
     else:
         raise ValueError("Unsupported SUMMARY_MODEL")
+
+    def summarize_transformer(text):
+        prompt = (
+            "Summarize the following scene descriptions from a video.\n"
+            "Only include what is explicitly described. Do not add people, objects, or locations that are not mentioned.\n\n"
+            "Captions:\n" + text + "\n\nSummary:"
+        )
+        inputs = tokenizer.encode(prompt, return_tensors="pt", truncation=True).to(model.device)
+        attention_mask = torch.ones_like(inputs)
+        outputs = model.generate(
+            inputs,
+            attention_mask=attention_mask,
+            max_new_tokens=100,
+            num_return_sequences=1,
+            no_repeat_ngram_size=2,
+            pad_token_id=tokenizer.eos_token_id
+        )
+        return tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+    return summarize_transformer
 
 summarizer = load_summarizer()
 
@@ -120,7 +143,7 @@ def generate_caption(image):
 
 def summarize_captions(captions):
     start_summary_time = time.time()
-    joined = " ".join(captions)
+    joined = "\n".join(captions)  # Use newlines instead of spaces
 
     if SUMMARY_MODEL == "bart":
         summary = summarizer(joined, max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
@@ -129,6 +152,7 @@ def summarize_captions(captions):
 
     end_summary_time = time.time()
     return summary, end_summary_time - start_summary_time
+
 
 def summarize_transition(prev_caption, curr_caption):
     if SUMMARY_MODEL not in ["gpt2", "llama"]:
