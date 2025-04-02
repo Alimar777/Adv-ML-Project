@@ -9,14 +9,7 @@ from collections import Counter
 from paths import *  # Ensure this is correctly set
 from transformers import BlipProcessor, BlipForConditionalGeneration, pipeline
 from PIL import Image
-
-# === ANSI Color Codes ===
-DARK_GREEN = "\033[38;2;0;128;0m"
-CYAN = "\033[38;2;0;255;255m"
-YELLOW = "\033[38;2;255;255;0m"
-RED = "\033[38;2;255;0;0m"
-MAGENTA = "\033[38;2;255;0;255m"
-RESET = "\033[0m"
+from utils import *
 
 # === Global Settings ===
 VIDEO_SELECTION_MODE = "single"  # Options: "all", "single"
@@ -34,9 +27,6 @@ PROMPT_STYLE = (
 device = "cuda" if torch.cuda.is_available() else "cpu"
 processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
 blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(device)
-
-nltk.download('punkt')
-nltk.download('stopwords')
 
 interval = 1  # Capture frame every 1 second
 
@@ -114,26 +104,6 @@ def load_summarizer():
     return summarize_transformer
 
 summarizer = load_summarizer()
-
-def extract_frames(video_path, interval=interval):
-    cap = cv2.VideoCapture(video_path)
-    frames = []
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-    frame_interval = interval * fps
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    video_duration = total_frames / fps if fps > 0 else 0
-
-    frame_count = 0
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        if frame_count % frame_interval == 0:
-            frames.append((frame_count, frame))
-        frame_count += 1
-
-    cap.release()
-    return frames, total_frames, video_duration
 
 def generate_caption(image):
     image_pil = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))

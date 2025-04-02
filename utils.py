@@ -10,6 +10,14 @@ from transformers import pipeline
 from PIL import Image
 from config import *
 
+# === ANSI Color Codes ===
+DARK_GREEN = "\033[38;2;0;128;0m"
+CYAN = "\033[38;2;0;255;255m"
+YELLOW = "\033[38;2;255;255;0m"
+RED = "\033[38;2;255;0;0m"
+MAGENTA = "\033[38;2;255;0;255m"
+RESET = "\033[0m"
+
 # Download necessary NLTK resources
 nltk.download('punkt')
 nltk.download('punkt_tab')
@@ -34,11 +42,17 @@ def extract_frames(video_path, interval=1):
     cap.release()
     return frames, total_frames, video_duration
 
-def generate_caption(image, processor, model, device):
+'''def generate_caption(image, processor, model, device):
     image_pil = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
     inputs = processor(images=image_pil, return_tensors="pt").to(device)
     caption_ids = model.generate(**inputs, max_new_tokens=60)
-    return processor.decode(caption_ids[0], skip_special_tokens=True)
+    return processor.decode(caption_ids[0], skip_special_tokens=True)'''
+
+def generate_caption(image):
+    image_pil = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    inputs = processor(images=image_pil, return_tensors="pt").to(device)
+    generated_ids = blip_model.generate(pixel_values=inputs["pixel_values"], max_new_tokens=60)
+    return processor.decode(generated_ids[0], skip_special_tokens=True)
 
 def save_results(video_filename, video_output_dir, csv_data, total_stats):
     csv_filename = os.path.join(video_output_dir, f"{video_filename[:-4]}_captions.csv")
