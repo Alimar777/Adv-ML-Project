@@ -1,27 +1,48 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a man is standing in a market with a bunch of vegetables,0.23705363273620605
-30,frame_30.jpg,a bunch of tomatoes,0.11702632904052734
-60,frame_60.jpg,a man is standing in front of a bunch of vegetables,0.22004938125610352
-90,frame_90.jpg,a man standing in front of a table full of vegetables,0.22105026245117188
-120,frame_120.jpg,a man standing in a kitchen with lots of vegetables,0.20304584503173828
-150,frame_150.jpg,a man in a kitchen preparing vegetables for sale,0.1890420913696289
-180,frame_180.jpg,a man in a kitchen,0.1290292739868164
-210,frame_210.jpg,a woman is shopping for vegetables at a market,0.18804216384887695
-240,frame_240.jpg,a woman standing in a market with a bunch of tomatoes,0.2180492877960205
-270,frame_270.jpg,a woman standing in a market,0.14303231239318848
-300,frame_300.jpg,a woman standing in a produce room,0.1600358486175537
-330,frame_330.jpg,a woman standing in front of a table full of vegetables,0.2180497646331787
-360,frame_360.jpg,a woman is shopping for vegetables,0.14403176307678223
-390,frame_390.jpg,a woman in a black jacket,0.14403223991394043
-420,frame_420.jpg,a woman standing in front of a table full of vegetables,0.21904945373535156
+0,frame_0.jpg,a man is standing in a market with a bunch of vegetables,0.24905610084533691
+30,frame_30.jpg,a bunch of tomatoes,0.1290292739868164
+60,frame_60.jpg,a man is standing in front of a bunch of vegetables,0.23205184936523438
+90,frame_90.jpg,a man standing in front of a table full of vegetables,0.23105192184448242
+120,frame_120.jpg,a man standing in a kitchen with lots of vegetables,0.2160487174987793
+150,frame_150.jpg,a man in a kitchen preparing vegetables for sale,0.19904518127441406
+180,frame_180.jpg,a man in a kitchen,0.13908958435058594
+210,frame_210.jpg,a woman is shopping for vegetables at a market,0.19998669624328613
+240,frame_240.jpg,a woman standing in a market with a bunch of tomatoes,0.23005175590515137
+270,frame_270.jpg,a woman standing in a market,0.1560349464416504
+300,frame_300.jpg,a woman standing in a produce room,0.1690382957458496
+330,frame_330.jpg,a woman standing in front of a table full of vegetables,0.2290511131286621
+360,frame_360.jpg,a woman is shopping for vegetables,0.15503501892089844
+390,frame_390.jpg,a woman in a black jacket,0.15503525733947754
+420,frame_420.jpg,a woman standing in front of a table full of vegetables,0.23005175590515137
 
 Video Stats
 Total Frames,433
 Video Duration (s),14.433333333333334
-Mean Processing Time (s),0.18337464332580566
-Median Processing Time (s),0.1890420913696289
-Mode Processing Time (s),0.23705363273620605
-Summary Processing Time (s),0.4230959415435791
-Total Processing Time (s),3.174715757369995
+Mean Processing Time (s),0.19464383125305176
+Median Processing Time (s),0.19998669624328613
+Mode Processing Time (s),0.23005175590515137
+Summary Processing Time (s),2.0954723358154297
+Total Processing Time (s),5.016129732131958
 
-Summary,A man is standing in a market with a bunch of vegetables. A woman is shopping for vegetables at a market. A man is preparing vegetables for sale.
+Summary,"Summarize the following scene descriptions from a video.
+Only include what is explicitly described. Do not add people, objects, or locations that are not mentioned.
+
+Captions:
+a man is standing in a market with a bunch of vegetables
+a bunch of tomatoes
+a man is standing in front of a bunch of vegetables
+a man standing in front of a table full of vegetables
+a man standing in a kitchen with lots of vegetables
+a man in a kitchen preparing vegetables for sale
+a man in a kitchen
+a woman is shopping for vegetables at a market
+a woman standing in a market with a bunch of tomatoes
+a woman standing in a market
+a woman standing in a produce room
+a woman standing in front of a table full of vegetables
+a woman is shopping for vegetables
+a woman in a black jacket
+a woman standing in front of a table full of vegetables
+
+Summary: 
+The video shows a man and a woman shopped for fresh vegetable at the market. The man stands in the produce section, while the woman stands at one of the tables with vegetals. They both look at different vegetal items and discuss their prices.  The video ends with the man buying a lot of fresh tomato and the women buys a few vegetales."

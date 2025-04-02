@@ -1,28 +1,50 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a dog walking down a dirt road with red flowers,0.4310033321380615
-25,frame_25.jpg,a dog running down a dirt road with red flowers,0.22500228881835938
-50,frame_50.jpg,a black cat walking down a dirt path,0.19304370880126953
-75,frame_75.jpg,a person walking down a dirt road with a dog,0.22204995155334473
-100,frame_100.jpg,a man walking down a dirt path with red flowers,0.2230510711669922
-125,frame_125.jpg,a man walking down a dirt path with a backpack,0.22204971313476562
-150,frame_150.jpg,a man walking down a dirt path with a backpack,0.2270512580871582
-175,frame_175.jpg,a person walking down a dirt path with red flowers,0.23005175590515137
-200,frame_200.jpg,a person walking down a dirt path with red flowers,0.22902870178222656
-225,frame_225.jpg,a man walking down a dirt path with a backpack,0.227097749710083
-250,frame_250.jpg,a man walking down a dirt path with a backpack,0.22876858711242676
-275,frame_275.jpg,a person walking down a dirt path with red flowers,0.22605085372924805
-300,frame_300.jpg,a man walking down a dirt path with red flowers,0.22805094718933105
-325,frame_325.jpg,a person walking down a dirt road with red flowers,0.23005175590515137
-350,frame_350.jpg,a person walking down a dirt road with red flowers,0.23005127906799316
-375,frame_375.jpg,a person walking down a dirt path with red flowers,0.22805142402648926
+0,frame_0.jpg,a dog walking down a dirt road with red flowers,0.4490489959716797
+25,frame_25.jpg,a dog running down a dirt road with red flowers,0.24405479431152344
+50,frame_50.jpg,a black cat walking down a dirt path,0.20604681968688965
+75,frame_75.jpg,a person walking down a dirt road with a dog,0.23405241966247559
+100,frame_100.jpg,a man walking down a dirt path with red flowers,0.2360529899597168
+125,frame_125.jpg,a man walking down a dirt path with a backpack,0.23305273056030273
+150,frame_150.jpg,a man walking down a dirt path with a backpack,0.2340526580810547
+175,frame_175.jpg,a person walking down a dirt path with red flowers,0.23905372619628906
+200,frame_200.jpg,a person walking down a dirt path with red flowers,0.23705339431762695
+225,frame_225.jpg,a man walking down a dirt path with a backpack,0.23705339431762695
+250,frame_250.jpg,a man walking down a dirt path with a backpack,0.23705339431762695
+275,frame_275.jpg,a person walking down a dirt path with red flowers,0.238053560256958
+300,frame_300.jpg,a man walking down a dirt path with red flowers,0.23705387115478516
+325,frame_325.jpg,a person walking down a dirt road with red flowers,0.2360529899597168
+350,frame_350.jpg,a person walking down a dirt road with red flowers,0.23705339431762695
+375,frame_375.jpg,a person walking down a dirt path with red flowers,0.23705267906188965
 
 Video Stats
 Total Frames,386
 Video Duration (s),15.44
-Mean Processing Time (s),0.23752839863300323
-Median Processing Time (s),0.22757434844970703
-Mode Processing Time (s),0.23005175590515137
-Summary Processing Time (s),0.0
-Total Processing Time (s),10.929935693740845
+Mean Processing Time (s),0.24824011325836182
+Median Processing Time (s),0.23705339431762695
+Mode Processing Time (s),0.23705339431762695
+Summary Processing Time (s),1.6353678703308105
+Total Processing Time (s),5.61021089553833
 
-Summary,the dog is running away from the cat. the dog walks down the dirt path with a red flower. the dog walks down the dirt trail. the man walks down the dirt road with a red flower. the man walks down the dirt road with his backpack and a bag. the man walks down the dirt road with the backpack and the flowers. the man walks down the dirt road with the backpack and the woman walks up the path. the man walks down the dirt trail with a red flower. the person walks down the dirt path with a red flower. the person walks down the dirt pathway with green flowers and the other person is walking on the path. the person walks down the dirt road with a red flower. the person who is walking with the dog is now walking in the same direction.
+Summary,"Summarize the following scene descriptions from a video.
+Only include what is explicitly described. Do not add people, objects, or locations that are not mentioned.
+
+Captions:
+a dog walking down a dirt road with red flowers
+a dog running down a dirt road with red flowers
+a black cat walking down a dirt path
+a person walking down a dirt road with a dog
+a man walking down a dirt path with red flowers
+a man walking down a dirt path with a backpack
+a man walking down a dirt path with a backpack
+a person walking down a dirt path with red flowers
+a person walking down a dirt path with red flowers
+a man walking down a dirt path with a backpack
+a man walking down a dirt path with a backpack
+a person walking down a dirt path with red flowers
+a man walking down a dirt path with red flowers
+a person walking down a dirt road with red flowers
+a person walking down a dirt road with red flowers
+a person walking down a dirt path with red flowers
+
+Summary: 
+The video shows a person and a black dog, a man and his back pack, and people walking on a path. The dog is walking with flowers, the man is carrying a bag, people are walking in different directions, but the dog and the flowers are the main focus."
