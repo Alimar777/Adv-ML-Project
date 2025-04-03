@@ -1,50 +1,26 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a dog walking down a dirt road with red flowers,0.9629826545715332
-25,frame_25.jpg,a dog running down a dirt road with red flowers,0.23205304145812988
-50,frame_50.jpg,a black cat walking down a dirt path,0.19604253768920898
-75,frame_75.jpg,a person walking down a dirt road with a dog,0.2250509262084961
-100,frame_100.jpg,a man walking down a dirt path with red flowers,0.22605061531066895
-125,frame_125.jpg,a man walking down a dirt path with a backpack,0.22905182838439941
-150,frame_150.jpg,a man walking down a dirt path with a backpack,0.22605133056640625
-175,frame_175.jpg,a person walking down a dirt path with red flowers,0.2250499725341797
-200,frame_200.jpg,a person walking down a dirt path with red flowers,0.22605133056640625
-225,frame_225.jpg,a man walking down a dirt path with a backpack,0.22805142402648926
-250,frame_250.jpg,a man walking down a dirt path with a backpack,0.22805118560791016
-275,frame_275.jpg,a person walking down a dirt path with red flowers,0.2250504493713379
-300,frame_300.jpg,a man walking down a dirt path with red flowers,0.22805190086364746
-325,frame_325.jpg,a person walking down a dirt road with red flowers,0.22805118560791016
-350,frame_350.jpg,a person walking down a dirt road with red flowers,0.22605109214782715
-375,frame_375.jpg,a person walking down a dirt path with red flowers,0.22605085372924805
+0,frame_0.jpg,a dog walking down a dirt road with red flowers,1.0632381439208984
+25,frame_25.jpg,a dog running down a dirt road with red flowers,0.7401666641235352
+50,frame_50.jpg,a black cat walking down a dirt path,0.7121601104736328
+75,frame_75.jpg,a person walking down a dirt road with a dog,0.7331647872924805
+100,frame_100.jpg,a man walking down a dirt path with red flowers,0.750169038772583
+125,frame_125.jpg,a man walking down a dirt path with a backpack,0.7531688213348389
+150,frame_150.jpg,a man walking down a dirt path with a backpack,0.7481694221496582
+175,frame_175.jpg,a person walking down a dirt path with red flowers,0.7411665916442871
+200,frame_200.jpg,a person walking down a dirt path with red flowers,0.7391657829284668
+225,frame_225.jpg,a man walking down a dirt path with a backpack,0.7351658344268799
+250,frame_250.jpg,a man walking down a dirt path with a backpack,0.7551701068878174
+275,frame_275.jpg,a person walking down a dirt path with red flowers,0.7411677837371826
+300,frame_300.jpg,a man walking down a dirt path with red flowers,0.7401669025421143
+325,frame_325.jpg,a person walking down a dirt road with red flowers,0.7391657829284668
+350,frame_350.jpg,a person walking down a dirt road with red flowers,0.7391667366027832
+375,frame_375.jpg,a person walking down a dirt path with red flowers,0.7421677112579346
 
 Video Stats
 Total Frames,386
 Video Duration (s),15.44
-Mean Processing Time (s),0.2711088955402374
-Median Processing Time (s),0.22605133056640625
-Mode Processing Time (s),0.22605133056640625
-Summary Processing Time (s),1.6528265476226807
-Total Processing Time (s),5.992571830749512
-
-Summary,"Summarize the following scene descriptions from a video.
-Only include what is explicitly described. Do not add people, objects, or locations that are not mentioned.
-
-Captions:
-a dog walking down a dirt road with red flowers
-a dog running down a dirt road with red flowers
-a black cat walking down a dirt path
-a person walking down a dirt road with a dog
-a man walking down a dirt path with red flowers
-a man walking down a dirt path with a backpack
-a man walking down a dirt path with a backpack
-a person walking down a dirt path with red flowers
-a person walking down a dirt path with red flowers
-a man walking down a dirt path with a backpack
-a man walking down a dirt path with a backpack
-a person walking down a dirt path with red flowers
-a man walking down a dirt path with red flowers
-a person walking down a dirt road with red flowers
-a person walking down a dirt road with red flowers
-a person walking down a dirt path with red flowers
-
-Summary: 
-The video shows a person and a black dog, a man and his back pack, and people walking on a path. The dog is walking with flowers, the man is carrying a bag, people are walking in different directions, but the dog and the flowers are the main focus."
+Mean Frame Processing Time,0.7607962638139725
+Median Frame Processing Time,0.7406667470932007
+Mode Frame Processing Time,0.7391657829284668
+Summary Processing Time,6.831823110580444
+Total Processing Time,51.52974820137024

@@ -1,38 +1,25 @@
+# BLIP2Vid2.py
 import cv2
 import torch
 import os
-import csv
-import time
 import statistics
-import nltk
-from collections import Counter
-from paths import *  # Ensure this is correctly set
-from transformers import BlipProcessor, BlipForConditionalGeneration, pipeline
-from PIL import Image
+from paths import *
+from transformers import BlipProcessor, BlipForConditionalGeneration
 from utils import *
 
 # === Global Settings ===
 VIDEO_SELECTION_MODE = "single"  # Options: "all", "single"
-SELECTED_VIDEO_INDEX = 3  # Only used if VIDEO_SELECTION_MODE == "single"
-DETAIL_MODE = True  # Print captions for each frame in single mode
-SUMMARY_MODEL = "tinyllama"  # Options: "bart", "gpt2", "llama", "mistral", "tinyllama", "nous"
+SELECTED_VIDEO_INDEX = 3
+DETAIL_MODE = True
+SUMMARY_MODEL = "tinyllama"
 
-# === Prompt Engineering (for GPT2/LLaMA transitions) ===
 PROMPT_STYLE = (
     "\n\nDescribe the visual change between the two scenes below "
     "in one concise sentence. \n\nPrevious: {prev}\nCurrent: {curr}\nTransition:"
 )
 
-# Load BLIP model and processor
-device = "cuda" if torch.cuda.is_available() else "cpu"
-processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(device)
-
-interval = 1  # Capture frame every 1 second
-
-def load_summarizer():
-    global tokenizer, model
-    from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+def load_summarizer(device):
+    from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
 
     def load_quantized_model(model_id):
         quant_config = BitsAndBytesConfig(
@@ -51,7 +38,8 @@ def load_summarizer():
         return tokenizer, model
 
     if SUMMARY_MODEL == "bart":
-        return pipeline("summarization", model="facebook/bart-large-cnn", device=0 if torch.cuda.is_available() else -1)
+        summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=0 if torch.cuda.is_available() else -1)
+        return summarizer, None, None
 
     elif SUMMARY_MODEL == "gpt2":
         from transformers import GPT2LMHeadModel, GPT2Tokenizer
@@ -86,7 +74,8 @@ def load_summarizer():
     def summarize_transformer(text):
         prompt = (
             "Summarize the following scene descriptions from a video.\n"
-            "Only include what is explicitly described. Do not add people, objects, or locations that are not mentioned.\n\n"
+            "Only include what is explicitly described. Avoid repitition. "
+            "Do not add people, objects, or locations that are not mentioned.\n\n"
             "Captions:\n" + text + "\n\nSummary:"
         )
         inputs = tokenizer.encode(prompt, return_tensors="pt", truncation=True).to(model.device)
@@ -94,42 +83,38 @@ def load_summarizer():
         outputs = model.generate(
             inputs,
             attention_mask=attention_mask,
-            max_new_tokens=100,
+            max_new_tokens=60,
+            temperature=1,
             num_return_sequences=1,
             no_repeat_ngram_size=2,
             pad_token_id=tokenizer.eos_token_id
         )
         return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-    return summarize_transformer
+    return summarize_transformer, tokenizer, model
 
-summarizer = load_summarizer()
-
-def generate_caption(image):
-    image_pil = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    inputs = processor(images=image_pil, return_tensors="pt").to(device)
-    generated_ids = blip_model.generate(pixel_values=inputs["pixel_values"], max_new_tokens=60)
-    return processor.decode(generated_ids[0], skip_special_tokens=True)
-
-def summarize_captions(captions):
+def summarize_captions(captions, summarizer, summary_model):
+    import time
     start_summary_time = time.time()
-    joined = "\n".join(captions)  # Use newlines instead of spaces
+    joined = "\n".join(captions)
 
-    if SUMMARY_MODEL == "bart":
+    if summary_model == "bart":
+        # Using the BART summarization pipeline
         summary = summarizer(joined, max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
     else:
+        # Using one of the GPT2/LLama/tinyLlama approaches
         summary = summarizer(joined)
 
     end_summary_time = time.time()
     return summary, end_summary_time - start_summary_time
 
-
 def summarize_transition(prev_caption, curr_caption):
+    # Only used if SUMMARY_MODEL in ["gpt2", "llama"]
     if SUMMARY_MODEL not in ["gpt2", "llama"]:
         raise ValueError("Transition summarization is only supported for gpt2 or llama.")
 
     prompt = PROMPT_STYLE.format(prev=prev_caption, curr=curr_caption)
-    inputs = tokenizer.encode(prompt, return_tensors="pt", truncation=True).to(device)
+    inputs = tokenizer.encode(prompt, return_tensors="pt", truncation=True).to(model.device)
     attention_mask = torch.ones_like(inputs)
 
     outputs = model.generate(
@@ -147,118 +132,183 @@ def summarize_transition(prev_caption, curr_caption):
     else:
         transition = decoded.strip()
 
-    transition = transition.split(".")[0].strip() + "."
-    return transition
+    return transition.split(".")[0].strip() + "."
 
-BLIP_OUTPUT_DIR = os.path.join(VIDEO_PATH, "Output", "BLIP")
-os.makedirs(BLIP_OUTPUT_DIR, exist_ok=True)
+def compare_summarizers(group_text, bart_summarizer, llama_summarizer, group_idx):
+    joined = "\n".join(group_text)
 
-video_indices = range(1, 11) if VIDEO_SELECTION_MODE == "all" else [SELECTED_VIDEO_INDEX]
+    bart_result = bart_summarizer(joined, max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
+    llama_result = llama_summarizer(joined)
 
-for i in video_indices:
-    video_filename = f"{i:02d}.mp4"
-    video_path = os.path.join(VIDEO_PATH, video_filename)
-    if not os.path.exists(video_path):
-        print(f"{RED}Video file {video_filename} not found. Skipping...{RESET}")
-        continue
-
-    video_output_dir = os.path.join(BLIP_OUTPUT_DIR, video_filename[:-4])
-    os.makedirs(video_output_dir, exist_ok=True)
-
-    summary_output_dir = os.path.join(video_output_dir, "Summaries", SUMMARY_MODEL)
-    os.makedirs(summary_output_dir, exist_ok=True)
-
-    print(f"{CYAN}\nProcessing {video_filename}...{RESET}\n")
-
-    frames, total_frames, video_duration = extract_frames(video_path, interval)
-    captions, csv_data, frame_times = [], [], []
-    total_start_time = time.time()
-    transitions = []
-
-    for frame_number, frame in frames:
-        start_time = time.time()
-        caption = generate_caption(frame)
-        end_time = time.time()
-
-        captions.append(caption)
-        frame_times.append(end_time - start_time)
-        csv_data.append([frame_number, f"frame_{frame_number}.jpg", caption, end_time - start_time])
-
-        if VIDEO_SELECTION_MODE == "single" and DETAIL_MODE:
-            print(f"{DARK_GREEN}Frame {frame_number}:{RESET} {caption}")
-
-        if SUMMARY_MODEL in ["gpt2", "llama"] and len(captions) > 1:
-            prev_caption = captions[-2]
-            curr_caption = captions[-1]
-            transition = summarize_transition(prev_caption, curr_caption)
-            transitions.append((prev_caption, curr_caption, transition))
-            print(f"{YELLOW}Transition:{RESET} {transition}")
-
-    mean_time = statistics.mean(frame_times)
-    median_time = statistics.median(frame_times)
-    mode_time = statistics.mode(frame_times) if len(frame_times) > 1 else frame_times[0]
-
-    if transitions and SUMMARY_MODEL in ["gpt2", "llama"]:
-        # Use only unique transitions as summary to avoid hallucinations
-        transition_sentences = sorted(set(t[2] for t in transitions))
-        final_summary = " ".join(transition_sentences)
-        summary_time = 0.0  # Since no model call is made
-    else:
-        final_summary, summary_time = summarize_captions(captions)
+    print(f"\n{YELLOW}Summarizing Group {group_idx+1}:{RESET}")
+    print(f"{CYAN}BART Summary:{RESET}  {bart_result}")
+    print(f"{MAGENTA}LLAMA Summary:{RESET} {llama_result}")
 
 
-    total_end_time = time.time()
-    total_processing_time = total_end_time - total_start_time
 
-    csv_filename = os.path.join(video_output_dir, f"{video_filename[:-4]}_captions.csv")
-    with open(csv_filename, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow(["Frame Number", "Image File", "Caption", "Processing Time (s)"])
-        writer.writerows(csv_data)
-        writer.writerow([])
-        writer.writerow(["Video Stats"])
-        writer.writerow(["Total Frames", total_frames])
-        writer.writerow(["Video Duration (s)", video_duration])
-        writer.writerow(["Mean Processing Time (s)", mean_time])
-        writer.writerow(["Median Processing Time (s)", median_time])
-        writer.writerow(["Mode Processing Time (s)", mode_time])
-        writer.writerow(["Summary Processing Time (s)", summary_time])
-        writer.writerow(["Total Processing Time (s)", total_processing_time])
-        writer.writerow([])
-        writer.writerow(["Summary", final_summary])
+# Load BART-CNN summarizer (for comparison)
+from transformers import pipeline as hf_pipeline
+bart_summarizer = hf_pipeline("summarization", model="facebook/bart-large-cnn", device=0 if torch.cuda.is_available() else -1)
 
-    summary_filename = os.path.join(summary_output_dir, f"{video_filename[:-4]}_summary.csv")
-    with open(summary_filename, mode="w", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow(["Summary Model", SUMMARY_MODEL])
-        writer.writerow(["Total Captions", len(captions)])
-        writer.writerow(["Summary Text", final_summary])
-        writer.writerow(["Summary Processing Time (s)", summary_time])
-        writer.writerow(["Total Video Processing Time (s)", total_processing_time])
+def main():
+    """
+    Main video-processing workflow:
+    1) Extract frames from each video at a chosen interval.
+    2) Generate a caption for each frame using BLIP.
+    3) Check semantic similarity between consecutive captions on-the-fly:
+       - If difference is large, we mark a "significant change" and start a new group.
+    4) (Optionally) Summarize transitions if using GPT2/LLama.
+    5) Summarize all captions at the end.
+    6) Save results, plus optional cluster visualizations.
+    """
 
-    captions_txt_path = os.path.join(summary_output_dir, f"{video_filename[:-4]}_captions.txt")
-    with open(captions_txt_path, mode="w", encoding="utf-8") as f:
-        f.write("\n".join(captions))
+    global summarizer, tokenizer, model
 
-    if transitions:
-        transitions_csv_path = os.path.join(summary_output_dir, f"{video_filename[:-4]}_transitions.csv")
-        with open(transitions_csv_path, mode="w", newline="", encoding="utf-8") as file:
-            writer = csv.writer(file)
-            writer.writerow(["Previous Caption", "Current Caption", "Transition Summary"])
-            writer.writerows(transitions)
+    # Set up device, BLIP processor/model, summarizer
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+    blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(device)
+    summarizer, tokenizer, model = load_summarizer(device)
 
-    print(f"\n{MAGENTA}=== All Unique Transitions ==={RESET}")
-    for unique_transition in sorted(set(t[2] for t in transitions)):
-        print(f"- {unique_transition}")
+    # 1) Model for on‐the‐fly semantic checks
+    from sentence_transformers import SentenceTransformer, util
+    embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+    # Adjust this threshold if you want more or fewer "significant changes"
+    similarity_threshold = 0.61
 
-    print(f"\n{MAGENTA}=== Final Video Summary ==={RESET}")
-    print(f"{final_summary}")
+    interval = 1
+    BLIP_OUTPUT_DIR = os.path.join(VIDEO_PATH, "Output", "BLIP")
+    os.makedirs(BLIP_OUTPUT_DIR, exist_ok=True)
 
-    print(f"\n{MAGENTA}=== Processing Time Stats ==={RESET}")
-    print(f"{CYAN}Total Frames:{RESET} {total_frames}")
-    print(f"{CYAN}Video Duration:{RESET} {video_duration:.2f} seconds")
-    print(f"{CYAN}Mean Frame Processing Time:{RESET} {mean_time:.4f} seconds")
-    print(f"{CYAN}Median Frame Processing Time:{RESET} {median_time:.4f} seconds")
-    print(f"{CYAN}Mode Frame Processing Time:{RESET} {mode_time:.4f} seconds")
-    print(f"{CYAN}Summary Processing Time:{RESET} {summary_time:.4f} seconds")
-    print(f"{CYAN}Total Processing Time:{RESET} {total_processing_time:.4f} seconds")
+    # Whether to do all videos or just a single chosen one
+    video_indices = range(1, 11) if VIDEO_SELECTION_MODE == "all" else [SELECTED_VIDEO_INDEX]
+
+    for i in video_indices:
+        video_filename = f"{i:02d}.mp4"
+        video_path = os.path.join(VIDEO_PATH, video_filename)
+        if not os.path.exists(video_path):
+            print(f"{RED}Video file {video_filename} not found. Skipping...{RESET}")
+            continue
+
+        # Prepare output directories
+        video_output_dir = os.path.join(BLIP_OUTPUT_DIR, video_filename[:-4])
+        os.makedirs(video_output_dir, exist_ok=True)
+        summary_output_dir = os.path.join(video_output_dir, "Summaries", SUMMARY_MODEL)
+        os.makedirs(summary_output_dir, exist_ok=True)
+
+        print(f"{CYAN}\nProcessing {video_filename}...{RESET}\n")
+
+        # Extract frames
+        frames, total_frames, video_duration = extract_frames(video_path, interval)
+
+        # Placeholders for results
+        captions, csv_data, frame_times = [], [], []
+        transitions = []
+
+        # 2) Track caption groups
+        grouped_captions = []
+        current_group = []
+        last_embedding = None
+
+        import time
+        total_start_time = time.time()
+
+        for frame_number, frame in frames:
+            start_time = time.time()
+            # Generate a BLIP caption for this frame
+            caption = generate_caption(frame, processor, blip_model, device)
+            end_time = time.time()
+
+            captions.append(caption)
+            frame_times.append(end_time - start_time)
+            csv_data.append([frame_number, f"frame_{frame_number}.jpg", caption, end_time - start_time])
+
+            if VIDEO_SELECTION_MODE == "single" and DETAIL_MODE:
+                print(f"{DARK_GREEN}Frame {frame_number}:{RESET} {caption}")
+
+            # 3) Compute new caption embedding
+            new_embedding = embedding_model.encode(caption, convert_to_tensor=True)
+
+            # 4) Compare similarity with the previous embedding
+            if last_embedding is not None:
+                sim_score = util.pytorch_cos_sim(new_embedding, last_embedding).item()
+                if sim_score < similarity_threshold:
+                    print(f"{YELLOW}Significant change detected at frame {frame_number}!"
+                          f" Similarity={sim_score:.2f}{RESET}")
+                    # Close out the old group
+                    grouped_captions.append(current_group)
+                    current_group = []
+
+            # Add the current caption to our active group
+            current_group.append(caption)
+            last_embedding = new_embedding
+
+            # If you want transitions for GPT2/LLama
+            if SUMMARY_MODEL in ["gpt2", "llama"] and len(captions) > 1:
+                transition = summarize_transition(captions[-2], captions[-1])
+                transitions.append((captions[-2], captions[-1], transition))
+                print_transition(transition)
+
+        # End of frames — close out the last group
+        if current_group:
+            grouped_captions.append(current_group)
+
+        print(f"\n{MAGENTA}=== Grouped Caption Sets (Semantic Clusters) ==={RESET}")
+        for idx, group in enumerate(grouped_captions):
+            print(f"\n{CYAN}Group {idx+1} ({len(group)} captions):{RESET}")
+            for caption in group:
+                print(f"  - {caption}")
+
+            compare_summarizers(group, bart_summarizer, summarizer, idx)
+
+
+        # Summarization logic
+        mean_time = statistics.mean(frame_times)
+        median_time = statistics.median(frame_times)
+        mode_time = statistics.mode(frame_times) if len(frame_times) > 1 else frame_times[0]
+
+        # If we have transitions from GPT2/LLama summarization:
+        if transitions and SUMMARY_MODEL in ["gpt2", "llama"]:
+            # For demonstration, building a "final summary" by combining transitions
+            final_summary = " ".join(sorted(set(t[2] for t in transitions)))
+            summary_time = 0.0
+        else:
+            # Otherwise use your summarizer for a single final summary of *all* captions
+            final_summary, summary_time = summarize_captions(captions, summarizer, SUMMARY_MODEL)
+
+        total_end_time = time.time()
+        total_processing_time = total_end_time - total_start_time
+
+        total_stats = {
+            "Total Frames": total_frames,
+            "Video Duration (s)": video_duration,
+            "Mean Frame Processing Time": mean_time,
+            "Median Frame Processing Time": median_time,
+            "Mode Frame Processing Time": mode_time,
+            "Summary Processing Time": summary_time,
+            "Total Processing Time": total_processing_time
+        }
+
+        # Save results and print summary
+        save_results(video_filename, video_output_dir, csv_data, total_stats)
+        save_summary_csv(summary_output_dir, video_filename, SUMMARY_MODEL, final_summary,
+                         summary_time, total_processing_time, len(captions))
+        save_captions_txt(summary_output_dir, video_filename, captions)
+        if transitions:
+            save_transitions_csv(summary_output_dir, video_filename, transitions)
+            print_unique_transitions(transitions)
+
+        print_video_summary(final_summary, total_stats)
+
+        # Condense all the final captions into clusters (existing function in utils)
+        condensed, cluster_map = condense_captions(captions, summarizer, threshold = similarity_threshold)
+        save_condensed_txt(summary_output_dir, video_filename, condensed)
+
+        # Visualize cluster similarity (optional)
+        visualize_clusters(captions, cluster_map, summary_output_dir, video_filename, method="both",threshold=similarity_threshold)
+        animate_caption_clusters(captions, cluster_map, summary_output_dir, video_filename, method='pca')
+        animate_caption_clusters(captions, cluster_map, summary_output_dir, video_filename, method='tsne')
+
+
+if __name__ == "__main__":
+    main()
