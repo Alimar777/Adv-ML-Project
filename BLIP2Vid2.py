@@ -68,6 +68,10 @@ def load_summarizer(device):
     elif SUMMARY_MODEL == "nous":
         tokenizer, model = load_quantized_model("NousResearch/Llama-2-7b-chat-hf")
 
+
+    elif SUMMARY_MODEL == "distilbart":
+        summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=0 if torch.cuda.is_available() else -1)
+        return summarizer, None, None
     else:
         raise ValueError("Unsupported SUMMARY_MODEL")
 
@@ -98,9 +102,12 @@ def summarize_captions(captions, summarizer, summary_model):
     start_summary_time = time.time()
     joined = "\n".join(captions)
 
-    if summary_model == "bart":
-        # Using the BART summarization pipeline
-        summary = summarizer(joined, max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
+    if summary_model in ["bart", "distilbart"]:
+        prompt = (
+            "Summarize the following descriptions into a single coherent scene:\n"
+            + joined
+        )
+        summary = summarizer(prompt, max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
     else:
         # Using one of the GPT2/LLama/tinyLlama approaches
         summary = summarizer(joined)
@@ -134,21 +141,28 @@ def summarize_transition(prev_caption, curr_caption):
 
     return transition.split(".")[0].strip() + "."
 
-def compare_summarizers(group_text, bart_summarizer, llama_summarizer, group_idx):
+def compare_summarizers(group_text, bart_summarizer, llama_summarizer, group_idx, distilbart_summarizer=None):
     joined = "\n".join(group_text)
 
     bart_result = bart_summarizer(joined, max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
+    distilbart_result = distilbart_summarizer(joined, max_length=100, min_length=15, do_sample=False)[0]["summary_text"] if distilbart_summarizer else None
+
     llama_result = llama_summarizer(joined)
 
     print(f"\n{YELLOW}Summarizing Group {group_idx+1}:{RESET}")
     print(f"{CYAN}BART Summary:{RESET}  {bart_result}")
     print(f"{MAGENTA}LLAMA Summary:{RESET} {llama_result}")
+    if distilbart_result:
+        print(f"{DARK_GREEN}DistilBART Summary:{RESET} {distilbart_result}")
+
 
 
 
 # Load BART-CNN summarizer (for comparison)
 from transformers import pipeline as hf_pipeline
 bart_summarizer = hf_pipeline("summarization", model="facebook/bart-large-cnn", device=0 if torch.cuda.is_available() else -1)
+distilbart_summarizer = hf_pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=0 if torch.cuda.is_available() else -1)
+
 
 def main():
     """
@@ -166,7 +180,7 @@ def main():
 
     # Set up device, BLIP processor/model, summarizer
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+    processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base", use_fast=True)
     blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(device)
     summarizer, tokenizer, model = load_summarizer(device)
 
@@ -259,7 +273,7 @@ def main():
             for caption in group:
                 print(f"  - {caption}")
 
-            compare_summarizers(group, bart_summarizer, summarizer, idx)
+            compare_summarizers(group, bart_summarizer, summarizer, idx, distilbart_summarizer)
 
 
         # Summarization logic
@@ -275,6 +289,7 @@ def main():
         else:
             # Otherwise use your summarizer for a single final summary of *all* captions
             final_summary, summary_time = summarize_captions(captions, summarizer, SUMMARY_MODEL)
+
 
         total_end_time = time.time()
         total_processing_time = total_end_time - total_start_time
