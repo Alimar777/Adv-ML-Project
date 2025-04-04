@@ -1,0 +1,35 @@
+Summarize the following scene descriptions from a video.
+Only include what is explicitly described. Avoid repitition. Do not add people, objects, or locations that are not mentioned.
+
+Captions:
+a dog walking down a dirt road with red flowers
+a dog running down a dirt road with red flowers
+a person walking down a dirt road with a dog
+a man walking down a dirt path with red flowers
+a person walking down a dirt path with red flowers
+a person walking down a dirt path with red flowers
+a person walking down a dirt path with red flowers
+a man walking down a dirt path with red flowers
+a person walking down a dirt road with red flowers
+a person walking down a dirt road with red flowers
+a person walking down a dirt path with red flowers
+
+Summary: 
+The video shows a person and a pet walking through a rural area with various flowers. The video includes a man and dog, a woman and child, and various people walking on the dried-up ditches. (11s)
+Summarize the following scene descriptions from a video.
+Only include what is explicitly described. Avoid repitition. Do not add people, objects, or locations that are not mentioned.
+
+Captions:
+a black cat walking down a dirt path
+
+Summary: A black and white cat walks down an unpaved ditch, occasionally stopping to look back at the camera. The cat's fur is matted and dirty, and it has a distinctive, unkempt appearance. Its eyes are large and expressive. As it walkaway (1s)
+Summarize the following scene descriptions from a video.
+Only include what is explicitly described. Avoid repitition. Do not add people, objects, or locations that are not mentioned.
+
+Captions:
+a man walking down a dirt path with a backpack
+a man walking down a dirt path with a backpack
+a man walking down a dirt path with a backpack
+a man walking down a dirt path with a backpack
+
+Summary: The video shows a man, who is wearing a black back pack, walking through a dense forest. The man is seen walking slowly and deliberately, with his back turned to the camera. He stops at a small clearing and picks up a large rock. As he walks back to (4s)

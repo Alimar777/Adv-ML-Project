@@ -5,42 +5,25 @@ import statistics
 from collections import Counter, defaultdict
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from PIL import Image
 import cv2
 import torch
 import nltk
+from PIL import Image
+
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.patches import Ellipse
+from matplotlib.animation import FuncAnimation, PillowWriter
+
 from config import *
 
 from transformers import pipeline
 from sentence_transformers import SentenceTransformer, util
+
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-from scipy.spatial import ConvexHull
-
-
-import os
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-from sentence_transformers import SentenceTransformer
-from collections import defaultdict, Counter
-from scipy.spatial import ConvexHull
-import numpy as np
-import matplotlib.patches as mpatches
 
 from scipy.spatial import ConvexHull, QhullError
-from matplotlib.patches import Ellipse
-import numpy as np
-
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from matplotlib.animation import FuncAnimation
-from sentence_transformers import SentenceTransformer
-from sklearn.decomposition import PCA
 
 
 # === ANSI Color Codes ===
@@ -245,14 +228,6 @@ def visualize_clusters(captions, cluster_map, output_dir, video_filename, method
     if method in ["tsne", "both"]:
         reduced_tsne = TSNE(n_components=2, perplexity=5, learning_rate=100, init='random', random_state=42).fit_transform(embeddings)
         _plot(reduced_tsne, "Caption Clusters (t-SNE)", "cluster_plot_tsne", is_pca=False)
-
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from matplotlib.animation import FuncAnimation, PillowWriter
-from sentence_transformers import SentenceTransformer
-from sklearn.decomposition import PCA
 
 def animate_caption_clusters(captions, cluster_map, output_path, video_filename, method='pca'):
     assert method in ['pca', 'tsne'], "method must be 'pca' or 'tsne'"

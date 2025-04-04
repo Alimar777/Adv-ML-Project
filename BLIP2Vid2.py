@@ -107,7 +107,9 @@ def summarize_captions(captions, summarizer, summary_model):
             "Summarize the following descriptions into a single coherent scene:\n"
             + joined
         )
-        summary = summarizer(prompt, max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
+        input_len = len(prompt.split())
+        max_len = min(100, max(10, int(input_len * 1.2)))
+        summary = summarizer(prompt, max_length=max_len, min_length=6, do_sample=False)[0]["summary_text"]
     else:
         # Using one of the GPT2/LLama/tinyLlama approaches
         summary = summarizer(joined)
@@ -143,17 +145,26 @@ def summarize_transition(prev_caption, curr_caption):
 
 def compare_summarizers(group_text, bart_summarizer, llama_summarizer, group_idx, distilbart_summarizer=None):
     joined = "\n".join(group_text)
+    input_len = len(joined.split())
+    max_len = min(100, max(10, int(input_len * 1.2)))
 
-    bart_result = bart_summarizer(joined, max_length=100, min_length=15, do_sample=False)[0]["summary_text"]
-    distilbart_result = distilbart_summarizer(joined, max_length=100, min_length=15, do_sample=False)[0]["summary_text"] if distilbart_summarizer else None
+    bart_result = bart_summarizer(joined, max_length=max_len, min_length=6, do_sample=False)[0]["summary_text"]
+
+    if distilbart_summarizer:
+        distilbart_result = distilbart_summarizer(joined, max_length=max_len, min_length=6, do_sample=False)[0]["summary_text"]
+    else:
+        distilbart_result = None
 
     llama_result = llama_summarizer(joined)
 
     print(f"\n{YELLOW}Summarizing Group {group_idx+1}:{RESET}")
     print(f"{CYAN}BART Summary:{RESET}  {bart_result}")
-    print(f"{MAGENTA}LLAMA Summary:{RESET} {llama_result}")
     if distilbart_result:
         print(f"{DARK_GREEN}DistilBART Summary:{RESET} {distilbart_result}")
+    print(f"{MAGENTA}LLAMA Summary:{RESET} {llama_result}")
+
+
+    
 
 
 
