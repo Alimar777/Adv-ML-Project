@@ -11,31 +11,11 @@ from utils import *
 VIDEO_SELECTION_MODE = "single"  # Options: "all", "single"
 SELECTED_VIDEO_INDEX = 3
 DETAIL_MODE = True
-SUMMARY_MODEL = "tinyllama"
+SUMMARY_MODEL = "majority"
 
-PROMPT_STYLE = (
-    "\n\nDescribe the visual change between the two scenes below "
-    "in one concise sentence. \n\nPrevious: {prev}\nCurrent: {curr}\nTransition:"
-)
 
 def load_summarizer(device):
     from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
-
-    def load_quantized_model(model_id):
-        quant_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.float16,
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_quant_type="nf4"
-        )
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
-        tokenizer.pad_token = tokenizer.eos_token
-        model = AutoModelForCausalLM.from_pretrained(
-            model_id,
-            quantization_config=quant_config,
-            device_map="auto"
-        )
-        return tokenizer, model
 
     if SUMMARY_MODEL == "bart":
         summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=0 if torch.cuda.is_available() else -1)
@@ -47,52 +27,44 @@ def load_summarizer(device):
         tokenizer.pad_token = tokenizer.eos_token
         model = GPT2LMHeadModel.from_pretrained("gpt2").to(device)
 
-    elif SUMMARY_MODEL == "llama":
-        from huggingface_hub import login
-        token_path = os.path.join(os.path.dirname(__file__), "hf_access_token.txt")
-        if not os.path.exists(token_path):
-            raise FileNotFoundError("Hugging Face access token file not found at hf_access_token.txt")
-        with open(token_path, "r") as f:
-            token = f.read().strip()
-        login(token)
-        tokenizer, model = load_quantized_model("meta-llama/Llama-2-7b-hf")
-
-    elif SUMMARY_MODEL == "mistral":
-        tokenizer, model = load_quantized_model("mistralai/Mistral-7B-Instruct-v0.1")
-
     elif SUMMARY_MODEL == "tinyllama":
         tokenizer = AutoTokenizer.from_pretrained("TinyLlama/TinyLlama-1.1B-Chat-v1.0")
         tokenizer.pad_token = tokenizer.eos_token
         model = AutoModelForCausalLM.from_pretrained("TinyLlama/TinyLlama-1.1B-Chat-v1.0").to(device)
 
-    elif SUMMARY_MODEL == "nous":
-        tokenizer, model = load_quantized_model("NousResearch/Llama-2-7b-chat-hf")
-
-
     elif SUMMARY_MODEL == "distilbart":
         summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=0 if torch.cuda.is_available() else -1)
         return summarizer, None, None
+    elif SUMMARY_MODEL == "majority":
+        def summarizer_stub(text):
+            return text.split("\n")[0]  # fallback stub
+        return summarizer_stub, None, None
     else:
         raise ValueError("Unsupported SUMMARY_MODEL")
 
     def summarize_transformer(text):
         prompt = (
-            "Summarize the following scene descriptions from a video.\n"
-            "Only include what is explicitly described. Avoid repitition. "
-            "Do not add people, objects, or locations that are not mentioned.\n\n"
+            "You are a summarizer. Follow these steps carefully.\n\n"
+            "1. Read the following scene descriptions exactly as written.\n"
+            "2. Identify only the nouns and adjectives present in the descriptions.\n"
+            "3. Do NOT add anything that is not mentioned in the text.\n"
+            "4. Combine the descriptions into one clear sentence using only the allowed words.\n\n"
             "Captions:\n" + text + "\n\nSummary:"
         )
+
         inputs = tokenizer.encode(prompt, return_tensors="pt", truncation=True).to(model.device)
         attention_mask = torch.ones_like(inputs)
         outputs = model.generate(
             inputs,
             attention_mask=attention_mask,
-            max_new_tokens=60,
+            max_new_tokens=30,
             temperature=1,
+            do_sample=False,  # Set to TRUE when modifying temperature != 1
             num_return_sequences=1,
             no_repeat_ngram_size=2,
             pad_token_id=tokenizer.eos_token_id
         )
+
         return tokenizer.decode(outputs[0], skip_special_tokens=True)
 
     return summarize_transformer, tokenizer, model
@@ -121,6 +93,11 @@ def summarize_transition(prev_caption, curr_caption):
     # Only used if SUMMARY_MODEL in ["gpt2", "llama"]
     if SUMMARY_MODEL not in ["gpt2", "llama"]:
         raise ValueError("Transition summarization is only supported for gpt2 or llama.")
+    
+    PROMPT_STYLE = (
+        "\n\nDescribe the visual change between the two scenes below "
+        "in one concise sentence. \n\nPrevious: {prev}\nCurrent: {curr}\nTransition:"
+    )
 
     prompt = PROMPT_STYLE.format(prev=prev_caption, curr=curr_caption)
     inputs = tokenizer.encode(prompt, return_tensors="pt", truncation=True).to(model.device)
@@ -144,6 +121,11 @@ def summarize_transition(prev_caption, curr_caption):
     return transition.split(".")[0].strip() + "."
 
 def compare_summarizers(group_text, bart_summarizer, llama_summarizer, group_idx, distilbart_summarizer=None):
+    if SUMMARY_MODEL == "majority":
+        summary = get_most_frequent_caption(group_text)
+        print(f"{CYAN}Group {group_idx+1} Majority Summary:{RESET} {summary} (Size: {len(group_text)})")
+        return
+    
     joined = "\n".join(group_text)
     input_len = len(joined.split())
     max_len = min(100, max(10, int(input_len * 1.2)))
@@ -199,7 +181,7 @@ def main():
     from sentence_transformers import SentenceTransformer, util
     embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
     # Adjust this threshold if you want more or fewer "significant changes"
-    similarity_threshold = 0.61
+    similarity_threshold = 0.85
 
     interval = 1
     BLIP_OUTPUT_DIR = os.path.join(VIDEO_PATH, "Output", "BLIP")
@@ -284,7 +266,15 @@ def main():
             for caption in group:
                 print(f"  - {caption}")
 
-            compare_summarizers(group, bart_summarizer, summarizer, idx, distilbart_summarizer)
+            if len(group) > 1:
+                unique_captions = set(group)
+                if len(unique_captions) == 1:
+                    repeated_caption = unique_captions.pop()
+                    print(f"{DARK_GREEN}Group {idx+1} is uniform. Skipping summarization. Returning repeated caption:{RESET} {repeated_caption}")
+                else:
+                    compare_summarizers(group, bart_summarizer, summarizer, idx, distilbart_summarizer)
+            else:
+                print(f"{YELLOW}Skipping summarization for Group {idx+1} (only one caption).{RESET}")
 
 
         # Summarization logic
@@ -327,14 +317,12 @@ def main():
         print_video_summary(final_summary, total_stats)
 
         # Condense all the final captions into clusters (existing function in utils)
-        condensed, cluster_map = condense_captions(captions, summarizer, threshold = similarity_threshold)
-        save_condensed_txt(summary_output_dir, video_filename, condensed)
+        cluster_map = generate_cluster_map(captions, threshold = similarity_threshold)
 
         # Visualize cluster similarity (optional)
         visualize_clusters(captions, cluster_map, summary_output_dir, video_filename, method="both",threshold=similarity_threshold)
         animate_caption_clusters(captions, cluster_map, summary_output_dir, video_filename, method='pca')
-        animate_caption_clusters(captions, cluster_map, summary_output_dir, video_filename, method='tsne')
-
+        animate_caption_clusters(captions, cluster_map, summary_output_dir, video_filename, method='tsne', save_frames = True)
 
 if __name__ == "__main__":
     main()

@@ -64,13 +64,12 @@ def generate_caption(image, processor, blip_model, device):
     generated_ids = blip_model.generate(pixel_values=inputs["pixel_values"], max_new_tokens=60)
     return processor.decode(generated_ids[0], skip_special_tokens=True)
 
-
-def condense_captions(captions, summarizer, threshold=0.85):
+def generate_cluster_map(captions, threshold=0.85):
     model = SentenceTransformer('all-MiniLM-L6-v2')
     embeddings = model.encode(captions, convert_to_tensor=True)
+
     clusters = []
     cluster_map = {}
-    cluster_captions = defaultdict(list)
 
     for i, caption in enumerate(captions):
         assigned = False
@@ -85,20 +84,7 @@ def condense_captions(captions, summarizer, threshold=0.85):
             clusters.append([i])
             cluster_map[i] = len(clusters) - 1
 
-    condensed_output = []
-    for cid, indices in enumerate(clusters):
-        grouped_captions = [captions[i] for i in indices]
-        duration = len(indices)
-        summary = summarizer("\n".join(grouped_captions))
-        condensed_output.append(f"{summary.strip()} ({duration}s)")
-
-    return condensed_output, cluster_map
-
-def save_condensed_txt(summary_output_dir, video_filename, condensed):
-    output_path = os.path.join(summary_output_dir, f"{video_filename[:-4]}_condensed.txt")
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(condensed))
-
+    return cluster_map
 
 def visualize_clusters(captions, cluster_map, output_dir, video_filename, method="both", cluster_labels=None, threshold = 0.85):
     model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -229,15 +215,22 @@ def visualize_clusters(captions, cluster_map, output_dir, video_filename, method
         reduced_tsne = TSNE(n_components=2, perplexity=5, learning_rate=100, init='random', random_state=42).fit_transform(embeddings)
         _plot(reduced_tsne, "Caption Clusters (t-SNE)", "cluster_plot_tsne", is_pca=False)
 
-def animate_caption_clusters(captions, cluster_map, output_path, video_filename, method='pca'):
+def animate_caption_clusters(captions, cluster_map, output_path, video_filename, method='pca', save_frames=False):
     assert method in ['pca', 'tsne'], "method must be 'pca' or 'tsne'"
 
+    import os
+    import numpy as np
+    import matplotlib.pyplot as plt
     from matplotlib.animation import FuncAnimation, PillowWriter
+    from sentence_transformers import SentenceTransformer
+    from sklearn.decomposition import PCA
+    from sklearn.manifold import TSNE
+    from scipy.spatial import ConvexHull, QhullError
+
     model = SentenceTransformer('all-MiniLM-L6-v2')
     embeddings = model.encode(captions)
     cluster_ids = np.array([cluster_map[i] for i in range(len(captions))])
 
-    # Choose dimensionality reduction
     if method == 'pca':
         reducer = PCA(n_components=2)
         title = "Caption Timeline Animation (PCA)"
@@ -249,11 +242,10 @@ def animate_caption_clusters(captions, cluster_map, output_path, video_filename,
 
     reduced = reducer.fit_transform(embeddings)
 
-    # Expanded axis limits
     x_range = reduced[:, 0].max() - reduced[:, 0].min()
     y_range = reduced[:, 1].max() - reduced[:, 1].min()
     padding_x = x_range * 0.15
-    padding_y = y_range * 0.15
+    padding_y = y_range * 0.25
     x_min, x_max = reduced[:, 0].min() - padding_x, reduced[:, 0].max() + padding_x
     y_min, y_max = reduced[:, 1].min() - padding_y, reduced[:, 1].max() + padding_y
 
@@ -268,11 +260,21 @@ def animate_caption_clusters(captions, cluster_map, output_path, video_filename,
     ax.set_ylabel("Component 2")
     ax.grid(True, linestyle='--', linewidth=0.5, alpha=0.3)
 
+    caption_text = fig.text(
+        0.5, 0.02, "", ha="center", fontsize=12, color="black", wrap=True
+    )
+
     drawn_artists = []
+
+    if save_frames:
+        for fname in os.listdir(output_path):
+            if fname.startswith(f"{video_filename[:-4]}_{method}_frame_") and fname.endswith(".png"):
+                os.remove(os.path.join(output_path, fname))
 
     def init():
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_min, y_max)
+        caption_text.set_text("")
         return []
 
     def update(frame):
@@ -280,7 +282,28 @@ def animate_caption_clusters(captions, cluster_map, output_path, video_filename,
             artist = drawn_artists.pop()
             artist.remove()
 
-        # Trail: draw all previous transitions with faded arrows
+        # --- Dynamic cluster shapes ---
+        for cid in unique_clusters:
+            cluster_indices = np.where(cluster_ids[:frame + 1] == cid)[0]
+            points = reduced[cluster_indices]
+            color = color_map[cid]
+            num_unique = len(np.unique(points, axis=0))
+
+            if len(points) >= 3 and num_unique >= 3:
+                try:
+                    hull = ConvexHull(points, qhull_options='QJ')
+                    hull_points = points[hull.vertices]
+                    polygon = plt.Polygon(hull_points, closed=True, fill=True, alpha=0.2, color=color)
+                    drawn_artists.append(ax.add_patch(polygon))
+                except QhullError:
+                    pass
+            elif len(points) == 2:
+                p1, p2 = points
+                line = ax.plot([p1[0], p2[0]], [p1[1], p2[1]], color=color, linewidth=2, alpha=0.4)[0]
+                drawn_artists.append(line)
+            # Else: singleton points are already shown in main scatter()
+
+        # --- Trail arrows ---
         for i in range(frame):
             start = reduced[i]
             end = reduced[i + 1]
@@ -289,14 +312,14 @@ def animate_caption_clusters(captions, cluster_map, output_path, video_filename,
                                 arrowprops=dict(arrowstyle='->', color=color_map[cid], lw=1, alpha=0.3))
             drawn_artists.append(arrow)
 
-        # Current points
+        # --- Current points ---
         current_points = reduced[:frame + 1]
         current_clusters = cluster_ids[:frame + 1]
         current_colors = [color_map[cid] for cid in current_clusters]
         scatter = ax.scatter(current_points[:, 0], current_points[:, 1], s=100, c=current_colors, edgecolors='k', alpha=0.9)
         drawn_artists.append(scatter)
 
-        # Draw current arrow
+        # --- Active arrow and index label ---
         if frame > 0:
             start = reduced[frame - 1]
             end = reduced[frame]
@@ -305,27 +328,24 @@ def animate_caption_clusters(captions, cluster_map, output_path, video_filename,
                                 arrowprops=dict(arrowstyle='->', color=color_map[cid], lw=2, alpha=0.8))
             drawn_artists.append(arrow)
 
-        x, y = reduced[frame]
-        cid = cluster_ids[frame]
-
-        # Cluster label: offset from arrow tip
-        cluster_label = ax.text(x + 0.8, y + 0.8, f"Cluster {cid}",
-                                fontsize=10, color='black', fontweight='bold', alpha=0.30)
-        drawn_artists.append(cluster_label)
-
-        # Frame number: centered on arrow
-        if frame > 0:
-            start = reduced[frame - 1]
-            end = reduced[frame]
             mid_x, mid_y = (start[0] + end[0]) / 2, (start[1] + end[1]) / 2
-            label = ax.text(mid_x, mid_y, str(frame),
-                            fontsize=11, color='black', alpha=0.60, fontweight='bold')
+            label = ax.text(mid_x, mid_y, str(frame), fontsize=11, color='black', alpha=0.60, fontweight='bold')
             drawn_artists.append(label)
 
-        # Progress indicator
-        progress = ax.text(0.02, 0.95, f"Frame {frame+1}/{len(captions)}",
-                           transform=ax.transAxes, fontsize=10, color='gray')
+        # --- Cluster label for current point ---
+        x, y = reduced[frame]
+        cid = cluster_ids[frame]
+        cluster_label = ax.text(x + 0.8, y + 0.8, f"Cluster {cid}", fontsize=10, color='black', fontweight='bold', alpha=0.30)
+        drawn_artists.append(cluster_label)
+
+        # --- Caption and progress text ---
+        caption_text.set_text(f"Caption: {captions[frame]}")
+        progress = ax.text(0.02, 0.95, f"Frame {frame+1}/{len(captions)}", transform=ax.transAxes, fontsize=10, color='gray')
         drawn_artists.append(progress)
+
+        if save_frames:
+            frame_output_path = os.path.join(output_path, f"{video_filename[:-4]}_{method}_frame_{frame+1:03d}.png")
+            fig.savefig(frame_output_path, dpi=100, bbox_inches='tight')
 
         return drawn_artists
 
@@ -336,7 +356,19 @@ def animate_caption_clusters(captions, cluster_map, output_path, video_filename,
     ani.save(save_path, dpi=100, writer=PillowWriter(fps=1))
     print(f"✅ {method.upper()} animation saved to: {save_path}")
 
+def get_most_frequent_caption(group):
+    return Counter(group).most_common(1)[0][0]
 
+def get_centroid_caption(group, model):
+    embeddings = model.encode(group)
+    centroid = np.mean(embeddings, axis=0)
+    distances = [np.linalg.norm(embedding - centroid) for embedding in embeddings]
+    closest_idx = np.argmin(distances)
+    return group[closest_idx], centroid
+
+def summarizer_distance_to_centroid(summary, centroid, model):
+    summary_embedding = model.encode([summary])[0]
+    return np.linalg.norm(summary_embedding - centroid)
 
 
 def save_results(video_filename, video_output_dir, csv_data, total_stats):
