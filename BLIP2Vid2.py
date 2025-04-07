@@ -8,34 +8,46 @@ from transformers import BlipProcessor, BlipForConditionalGeneration
 from utils import *
 
 # === Global Settings ===
-VIDEO_SELECTION_MODE = "single"  # Options: "all", "single"
-SELECTED_VIDEO_INDEX = 3
-DETAIL_MODE = True
-SUMMARY_MODEL = "majority"
+VIDEO_SELECTION_MODE        = "single"
+SELECTED_VIDEO_INDEX        = 3
+DETAIL_MODE                 = True
+SUMMARY_MODEL               = "majority"   # bart |  distilbart | gpt2 | tinyllama | majority
+TRANSITION_MODEL            = "majority"       #  gpt2 | tinyllama | majority
+TRANSITION_PROMPT_TEMPLATE  = (
+    "Describe the visual change between the two scenes below in ONE "
+    "concise sentence.\n\nPrevious: {prev}\nCurrent: {curr}\nTransition:"
+)
+GENERATE_GROUP_TRANSITIONS  = True
 
 
-def load_summarizer(device):
-    from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, pipeline
+STORY_OUTPUT_MODE = "verbose"   #  story | verbose 
 
-    if SUMMARY_MODEL == "bart":
+
+
+
+def load_summarizer(device, model_name):
+    from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+
+    if model_name == "bart":
         summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=0 if torch.cuda.is_available() else -1)
         return summarizer, None, None
 
-    elif SUMMARY_MODEL == "gpt2":
+    elif model_name == "distilbart":
+        summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=0 if torch.cuda.is_available() else -1)
+        return summarizer, None, None
+
+    elif model_name == "gpt2":
         from transformers import GPT2LMHeadModel, GPT2Tokenizer
         tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
         tokenizer.pad_token = tokenizer.eos_token
         model = GPT2LMHeadModel.from_pretrained("gpt2").to(device)
 
-    elif SUMMARY_MODEL == "tinyllama":
+    elif model_name == "tinyllama":
         tokenizer = AutoTokenizer.from_pretrained("TinyLlama/TinyLlama-1.1B-Chat-v1.0")
         tokenizer.pad_token = tokenizer.eos_token
         model = AutoModelForCausalLM.from_pretrained("TinyLlama/TinyLlama-1.1B-Chat-v1.0").to(device)
-
-    elif SUMMARY_MODEL == "distilbart":
-        summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=0 if torch.cuda.is_available() else -1)
-        return summarizer, None, None
-    elif SUMMARY_MODEL == "majority":
+    
+    elif model_name == "majority":
         def summarizer_stub(text):
             return text.split("\n")[0]  # fallback stub
         return summarizer_stub, None, None
@@ -48,7 +60,7 @@ def load_summarizer(device):
             "1. Read the following scene descriptions exactly as written.\n"
             "2. Identify only the nouns and adjectives present in the descriptions.\n"
             "3. Do NOT add anything that is not mentioned in the text.\n"
-            "4. Combine the descriptions into one clear sentence using only the allowed words.\n\n"
+            "4. Combine the descriptions into one clear sentence.\n\n"
             "Captions:\n" + text + "\n\nSummary:"
         )
 
@@ -89,36 +101,66 @@ def summarize_captions(captions, summarizer, summary_model):
     end_summary_time = time.time()
     return summary, end_summary_time - start_summary_time
 
-def summarize_transition(prev_caption, curr_caption):
-    # Only used if SUMMARY_MODEL in ["gpt2", "llama"]
-    if SUMMARY_MODEL not in ["gpt2", "llama"]:
-        raise ValueError("Transition summarization is only supported for gpt2 or llama.")
-    
-    PROMPT_STYLE = (
-        "\n\nDescribe the visual change between the two scenes below "
-        "in one concise sentence. \n\nPrevious: {prev}\nCurrent: {curr}\nTransition:"
-    )
+def summarize_transition(prev_caption, curr_caption,
+                         summarizer_fn, model_choice,
+                         prompt_template=TRANSITION_PROMPT_TEMPLATE):
+    """Return a one‑sentence bridge between two scene captions."""
+    # Fast path for the 'majority' stub
+    if model_choice == "majority":
+        return f"The scene shifts from “{prev_caption}” to “{curr_caption}.”"
 
-    prompt = PROMPT_STYLE.format(prev=prev_caption, curr=curr_caption)
-    inputs = tokenizer.encode(prompt, return_tensors="pt", truncation=True).to(model.device)
-    attention_mask = torch.ones_like(inputs)
+    prompt = prompt_template.format(prev=prev_caption, curr=curr_caption)
 
-    outputs = model.generate(
-        inputs,
-        attention_mask=attention_mask,
-        max_new_tokens=60,
-        num_return_sequences=1,
-        no_repeat_ngram_size=2,
-        pad_token_id=tokenizer.eos_token_id
-    )
+    if model_choice in ["bart", "distilbart"]:
+        max_len = min(60, max(10, int(len(prompt.split()) * 1.2)))
+        return summarizer_fn(prompt,
+                             max_length=max_len,
+                             min_length=6,
+                             do_sample=False)[0]["summary_text"].strip()
 
-    decoded = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    if "Transition:" in decoded:
-        transition = decoded.split("Transition:")[-1].strip()
+    # gpt‑style models (gpt2, llama, tinyllama …)
+    result = summarizer_fn(prompt)
+    if "Transition:" in result:
+        result = result.split("Transition:")[-1]
+    return result.strip().split(".")[0] + "."
+
+def output_story_set(group_summaries, group_transitions, mode=STORY_OUTPUT_MODE):
+    """
+    Print the narrative in either:
+      • 'story'    first group summary, then every bridge on its own line
+      • 'verbose'  group summary, then its bridge, each on separate lines
+    """
+    if not group_summaries:
+        print("ERROR:  No groups to narrate.")
+        return
+
+    if mode.lower() == "story":
+        print(f"\n{MAGENTA}=== Final Story ==={RESET}")
+        print(group_summaries[0])                     # first scene
+        for _, _, bridge in group_transitions:        # each bridge
+            print(bridge)
+
+    elif mode.lower() == "verbose":
+        print(f"\n{MAGENTA}=== Verbose Story ==={RESET}")
+        for i, summary in enumerate(group_summaries):
+            print(summary)                            # group summary
+            if i < len(group_transitions):            # its bridge (if any)
+                print(group_transitions[i][2])
     else:
-        transition = decoded.strip()
+        raise ValueError("STORY_OUTPUT_MODE must be 'story' or 'verbose'.")
 
-    return transition.split(".")[0].strip() + "."
+
+
+def summarize_group(group, summarizer, summary_model):
+    """
+    Return a one‑sentence description of an entire caption group.
+    Falls back to the group's only caption if it’s a singleton.
+    """
+    if len(group) == 1:
+        return group[0]
+    summary, _ = summarize_captions(group, summarizer, summary_model)
+    return summary.strip()
+
 
 def compare_summarizers(group_text, bart_summarizer, llama_summarizer, group_idx, distilbart_summarizer=None):
     if SUMMARY_MODEL == "majority":
@@ -140,15 +182,11 @@ def compare_summarizers(group_text, bart_summarizer, llama_summarizer, group_idx
     llama_result = llama_summarizer(joined)
 
     print(f"\n{YELLOW}Summarizing Group {group_idx+1}:{RESET}")
+    print(f"Majority: {get_most_frequent_caption(group_text)}")
     print(f"{CYAN}BART Summary:{RESET}  {bart_result}")
     if distilbart_result:
         print(f"{DARK_GREEN}DistilBART Summary:{RESET} {distilbart_result}")
     print(f"{MAGENTA}LLAMA Summary:{RESET} {llama_result}")
-
-
-    
-
-
 
 
 # Load BART-CNN summarizer (for comparison)
@@ -170,18 +208,25 @@ def main():
     """
 
     global summarizer, tokenizer, model
+    global trans_summarizer, trans_tokenizer, trans_model
 
     # Set up device, BLIP processor/model, summarizer
     device = "cuda" if torch.cuda.is_available() else "cpu"
     processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base", use_fast=True)
     blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(device)
-    summarizer, tokenizer, model = load_summarizer(device)
+    
+    # Caption / group summariser
+    summarizer, tokenizer, model = load_summarizer(device, SUMMARY_MODEL)
+
+    # Transition generator
+    trans_summarizer, trans_tokenizer, trans_model = load_summarizer(device, TRANSITION_MODEL)
+
 
     # 1) Model for on‐the‐fly semantic checks
     from sentence_transformers import SentenceTransformer, util
     embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
     # Adjust this threshold if you want more or fewer "significant changes"
-    similarity_threshold = 0.85
+    similarity_threshold = 0.61
 
     interval = 1
     BLIP_OUTPUT_DIR = os.path.join(VIDEO_PATH, "Output", "BLIP")
@@ -276,6 +321,34 @@ def main():
             else:
                 print(f"{YELLOW}Skipping summarization for Group {idx+1} (only one caption).{RESET}")
 
+        
+        group_summaries = [
+            summarize_group(g, summarizer, SUMMARY_MODEL) for g in grouped_captions
+        ]
+
+        # Optionally build transitions BETWEEN those summaries
+        group_transitions = []
+        if GENERATE_GROUP_TRANSITIONS and len(group_summaries) > 1:
+            for prev, curr in zip(group_summaries[:-1], group_summaries[1:]):
+                if TRANSITION_MODEL in ["gpt2", "tinyllama"]:
+                    bridge = summarize_transition(prev, curr,trans_summarizer, TRANSITION_MODEL)
+
+                else:
+                    # Fallback: plain template so we don't need a generative model
+                    bridge = f"The scene shifts from “{prev}” to “{curr}.”"
+                group_transitions.append((prev, curr, bridge))
+
+            # Pretty‑print
+            print(f"\n{MAGENTA}=== Group-level Transitions ==={RESET}")
+            for i, (_, _, t) in enumerate(group_transitions, 1):
+                print(f"{i}. {t}")
+
+        if group_transitions:
+            save_transitions_csv(
+                summary_output_dir,
+                video_filename.replace(".mp4", "_group"),
+                group_transitions
+            )
 
         # Summarization logic
         mean_time = statistics.mean(frame_times)
@@ -315,6 +388,8 @@ def main():
             print_unique_transitions(transitions)
 
         print_video_summary(final_summary, total_stats)
+
+        output_story_set(group_summaries, group_transitions, STORY_OUTPUT_MODE)
 
         # Condense all the final captions into clusters (existing function in utils)
         cluster_map = generate_cluster_map(captions, threshold = similarity_threshold)
