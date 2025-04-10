@@ -1,0 +1,38 @@
+Frame Number,Image File,Caption,Processing Time (s)
+0,frame_0.jpg,a group of people standing around a table full of food,0.24405527114868164
+29,frame_29.jpg,a group of people standing around a table full of food,0.24105405807495117
+58,frame_58.jpg,a group of people walking around a market,0.19504380226135254
+87,frame_87.jpg,people are shopping at a fish market in india,0.21204805374145508
+116,frame_116.jpg,a group of people standing around a market,0.20104503631591797
+145,frame_145.jpg,a group of people standing around a table full of food,0.24005413055419922
+174,frame_174.jpg,a group of people standing around a table full of food,0.24005413055419922
+203,frame_203.jpg,a woman in a market,0.15103363990783691
+232,frame_232.jpg,people are shopping at a fish market in india,0.2140483856201172
+261,frame_261.jpg,a group of people standing around a market,0.1960444450378418
+
+Video Stats
+Total Frames,276
+Video Duration (s),9.517241379310345
+Mean Processing Time (s),0.21344809532165526
+Median Processing Time (s),0.21304821968078613
+Mode Processing Time (s),0.24005413055419922
+Summary Processing Time (s),1.989448070526123
+Total Processing Time (s),4.123929023742676
+
+Summary,"Summarize the following scene descriptions from a video.
+Only include what is explicitly described. Do not add people, objects, or locations that are not mentioned.
+
+Captions:
+a group of people standing around a table full of food
+a group of people standing around a table full of food
+a group of people walking around a market
+people are shopping at a fish market in india
+a group of people standing around a market
+a group of people standing around a table full of food
+a group of people standing around a table full of food
+a woman in a market
+people are shopping at a fish market in india
+a group of people standing around a market
+
+Summary: 
+In this video, we see a group gathered around the table, surrounded by food. The group includes people of all ages, from different backgrounds, and with different expressions. They are all gathered together, enjoying the food and the atmosphere. We can see that they are enjoys the experience of shopped at the market, which is a common activity in India."

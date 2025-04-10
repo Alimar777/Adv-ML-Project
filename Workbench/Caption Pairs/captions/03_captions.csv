@@ -1,0 +1,26 @@
+Frame Number,Image File,Caption,Processing Time (s)
+0,frame_0.jpg,a dog walking down a dirt road with red flowers,1.3576760292053223
+25,frame_25.jpg,a dog running down a dirt road with red flowers,1.0192348957061768
+50,frame_50.jpg,a black cat walking down a dirt path,1.0225353240966797
+75,frame_75.jpg,a person walking down a dirt road with a dog,1.0640628337860107
+100,frame_100.jpg,a man walking down a dirt path with red flowers,1.0632495880126953
+125,frame_125.jpg,a man walking down a dirt path with a backpack,1.055241346359253
+150,frame_150.jpg,a man walking down a dirt path with a backpack,1.0568044185638428
+175,frame_175.jpg,a person walking down a dirt path with red flowers,1.0442001819610596
+200,frame_200.jpg,a person walking down a dirt path with red flowers,1.0575149059295654
+225,frame_225.jpg,a man walking down a dirt path with a backpack,1.0647895336151123
+250,frame_250.jpg,a man walking down a dirt path with a backpack,1.060274362564087
+275,frame_275.jpg,a person walking down a dirt path with red flowers,1.0502407550811768
+300,frame_300.jpg,a man walking down a dirt path with red flowers,1.1122002601623535
+325,frame_325.jpg,a person walking down a dirt road with red flowers,1.0690667629241943
+350,frame_350.jpg,a person walking down a dirt road with red flowers,1.0690877437591553
+375,frame_375.jpg,a person walking down a dirt path with red flowers,1.0323176383972168
+
+Video Stats
+Total Frames,386
+Video Duration (s),15.44
+Mean Frame Processing Time,1.0749060362577438
+Median Frame Processing Time,1.0588946342468262
+Mode Frame Processing Time,1.3576760292053223
+Summary Processing Time,0.0
+Total Processing Time,25.642431020736694

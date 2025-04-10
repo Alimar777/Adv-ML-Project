@@ -1,0 +1,44 @@
+Frame Number,Image File,Caption,Processing Time (s)
+0,frame_0.jpg,a man kicking a soccer ball in a yard,0.20104527473449707
+15,frame_15.jpg,a woman in a red shirt kicking a soccer ball,0.21904873847961426
+30,frame_30.jpg,a man kicking a soccer ball in a field,0.20104527473449707
+45,frame_45.jpg,a young boy kicking a soccer ball in a field,0.21504878997802734
+60,frame_60.jpg,a man kicking a soccer ball in a field,0.20204615592956543
+75,frame_75.jpg,a man kicking a soccer ball in a field,0.2000441551208496
+90,frame_90.jpg,a woman kicking a soccer ball in a field,0.20204567909240723
+105,frame_105.jpg,a man kicking a soccer ball in a field,0.20004510879516602
+120,frame_120.jpg,a woman in a red shirt is kicking a soccer ball,0.23105144500732422
+135,frame_135.jpg,a man in a red shirt is playing frc,0.2180492877960205
+150,frame_150.jpg,a man in a red shirt is playing with a frc,0.24805617332458496
+165,frame_165.jpg,a man in a red shirt is playing frc,0.22104978561401367
+180,frame_180.jpg,a man in a red shirt is playing frc,0.22204995155334473
+
+Video Stats
+Total Frames,182
+Video Duration (s),12.133333333333333
+Mean Processing Time (s),0.21389429385845476
+Median Processing Time (s),0.21504878997802734
+Mode Processing Time (s),0.20104527473449707
+Summary Processing Time (s),1.7273893356323242
+Total Processing Time (s),4.508015155792236
+
+Summary,"Summarize the following scene descriptions from a video.
+Only include what is explicitly described. Do not add people, objects, or locations that are not mentioned.
+
+Captions:
+a man kicking a soccer ball in a yard
+a woman in a red shirt kicking a soccer ball
+a man kicking a soccer ball in a field
+a young boy kicking a soccer ball in a field
+a man kicking a soccer ball in a field
+a man kicking a soccer ball in a field
+a woman kicking a soccer ball in a field
+a man kicking a soccer ball in a field
+a woman in a red shirt is kicking a soccer ball
+a man in a red shirt is playing frc
+a man in a red shirt is playing with a frc
+a man in a red shirt is playing frc
+a man in a red shirt is playing frc
+
+Summary: 
+The video shows a group of people playing soccers in different fields. The video starts with the man kicks a ball, followed by the woman and a young child kick the ball. Then, we see a man playing a game with another man, and the video ends with two men playing together."

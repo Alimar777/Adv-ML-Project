@@ -1,26 +1,26 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a dog walking down a dirt road with red flowers,0.6501448154449463
-25,frame_25.jpg,a dog running down a dirt road with red flowers,0.28406405448913574
-50,frame_50.jpg,a black cat walking down a dirt path,0.2450547218322754
-75,frame_75.jpg,a person walking down a dirt road with a dog,0.27906227111816406
-100,frame_100.jpg,a man walking down a dirt path with red flowers,0.2760612964630127
-125,frame_125.jpg,a man walking down a dirt path with a backpack,0.27706170082092285
-150,frame_150.jpg,a man walking down a dirt path with a backpack,0.27906227111816406
-175,frame_175.jpg,a person walking down a dirt path with red flowers,0.2830638885498047
-200,frame_200.jpg,a person walking down a dirt path with red flowers,0.27706170082092285
-225,frame_225.jpg,a man walking down a dirt path with a backpack,0.27906203269958496
-250,frame_250.jpg,a man walking down a dirt path with a backpack,0.27506113052368164
-275,frame_275.jpg,a person walking down a dirt path with red flowers,0.27506208419799805
-300,frame_300.jpg,a man walking down a dirt path with red flowers,0.2780625820159912
-325,frame_325.jpg,a person walking down a dirt road with red flowers,0.28106260299682617
-350,frame_350.jpg,a person walking down a dirt road with red flowers,0.27906250953674316
-375,frame_375.jpg,a person walking down a dirt path with red flowers,0.2710597515106201
+0,frame_0.jpg,a dog walking down a dirt road with red flowers,0.4651048183441162
+25,frame_25.jpg,a dog running down a dirt road with red flowers,0.24105429649353027
+50,frame_50.jpg,a black cat walking down a dirt path,0.19704461097717285
+75,frame_75.jpg,a person walking down a dirt road with a dog,0.24605584144592285
+100,frame_100.jpg,a man walking down a dirt path with red flowers,0.234053373336792
+125,frame_125.jpg,a man walking down a dirt path with a backpack,0.23905372619628906
+150,frame_150.jpg,a man walking down a dirt path with a backpack,0.24188566207885742
+175,frame_175.jpg,a person walking down a dirt path with red flowers,0.24905610084533691
+200,frame_200.jpg,a person walking down a dirt path with red flowers,0.2470557689666748
+225,frame_225.jpg,a man walking down a dirt path with a backpack,0.23905348777770996
+250,frame_250.jpg,a man walking down a dirt path with a backpack,0.2380540370941162
+275,frame_275.jpg,a person walking down a dirt path with red flowers,0.24205446243286133
+300,frame_300.jpg,a man walking down a dirt path with red flowers,0.24305510520935059
+325,frame_325.jpg,a person walking down a dirt road with red flowers,0.23105192184448242
+350,frame_350.jpg,a person walking down a dirt road with red flowers,0.23905444145202637
+375,frame_375.jpg,a person walking down a dirt path with red flowers,0.23705434799194336
 
 Video Stats
 Total Frames,386
 Video Duration (s),15.44
-Mean Frame Processing Time,0.2993168383836746
-Median Frame Processing Time,0.2785623073577881
-Mode Frame Processing Time,0.27906227111816406
+Mean Frame Processing Time,0.2518588751554489
+Median Frame Processing Time,0.24005436897277832
+Mode Frame Processing Time,0.4651048183441162
 Summary Processing Time,0.0
-Total Processing Time,4.951105356216431
+Total Processing Time,4.459353685379028
