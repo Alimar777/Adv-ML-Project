@@ -312,7 +312,7 @@ def main():
     5) Summarize all captions at the end.
     6) Save results + optional cluster visualizations.
     """
-    run_bridgebart_training_pipeline(force_train=True)
+    run_bridgebart_training_pipeline(force_train=False)
 
     global summarizer, tokenizer, model
     global trans_summarizer, trans_tokenizer, trans_model
