@@ -6,6 +6,12 @@ from paths import *
 from transformers import BlipProcessor, BlipForConditionalGeneration
 from utils import *
 from bridgeBART_builder import run_bridgebart_training_pipeline
+from dotenv import load_dotenv
+load_dotenv()
+
+import openai
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 
 
 
@@ -28,6 +34,8 @@ What's the transition?"""
 
 GENERATE_GROUP_TRANSITIONS  = True
 STORY_OUTPUT_MODE           = "verbose"   # story | verbose
+
+FINAL_SUMMARIZER_MODELS = ["bart", "distilbart", "flan-t5", "gpt-3.5", "gpt-4"]
 
 
 def load_summarizer(device, model_name):
@@ -213,11 +221,16 @@ def summarize_transition(prev_caption, curr_caption,
         return result.strip().split(".")[0] + "."
 
 
-def output_story_set(group_summaries, group_transitions, mode=STORY_OUTPUT_MODE):
+def output_story_set(group_summaries, group_transitions, mode=STORY_OUTPUT_MODE, grouped_captions=None):
     """
     Print the narrative in either:
     - 'story': first group summary, then each transition
-    - 'verbose': group summary, then its transition, etc.
+    - 'verbose': includes:
+        1. Original BLIP captions (in order)
+        2. Original BLIP captions (grouped) — already printed elsewhere
+        3. Group summaries only
+        4. First summary + transitions
+        5. Summary + transition interleaved per group
     """
     if not group_summaries:
         print("ERROR: No groups to narrate.")
@@ -228,14 +241,41 @@ def output_story_set(group_summaries, group_transitions, mode=STORY_OUTPUT_MODE)
         print(group_summaries[0])
         for _, _, bridge in group_transitions:
             print(bridge)
+
     elif mode.lower() == "verbose":
         print(f"\n{MAGENTA}=== Verbose Story ==={RESET}")
+
+        # 1. All original BLIP captions in order
+        print(f"\n{CYAN}-- Original BLIP Captions (In Order) --{RESET}")
+        if grouped_captions:
+            all_captions = [cap for group in grouped_captions for cap in group]
+            for i, cap in enumerate(all_captions, 1):
+                print(f"{i:02d}. {cap}")
+
+        # 2. Grouped captions already printed earlier in main()
+
+        # 3. Group summaries only
+        print(f"\n{CYAN}-- Group Summaries --{RESET}")
+        for i, summary in enumerate(group_summaries, 1):
+            print(f"Group {i}: {summary}")
+
+        # 4. First summary + all transitions
+        print(f"\n{CYAN}-- Summary + Transitions --{RESET}")
+        if group_summaries:
+            print(f"Summary 1: {group_summaries[0]}")
+            for j, (_, _, bridge) in enumerate(group_transitions, 1):
+                print(f"Transition {j}: {bridge}")
+
+        # 5. Interleaved format (original verbose style)
+        print(f"\n{CYAN}-- Summary + Transition for Each Group --{RESET}")
         for i, summary in enumerate(group_summaries):
-            print(summary)
+            print(f"Group {i+1} Summary: {summary}")
             if i < len(group_transitions):
-                print(group_transitions[i][2])
+                print(f"Group {i+1} → {i+2} Transition: {group_transitions[i][2]}")
+
     else:
         raise ValueError("STORY_OUTPUT_MODE must be 'story' or 'verbose'.")
+
 
 
 def summarize_group(group, summarizer, summary_model):
@@ -300,6 +340,41 @@ distilbart_summarizer = hf_pipeline(
     model="sshleifer/distilbart-cnn-12-6",
     device=0 if torch.cuda.is_available() else -1
 )
+
+def get_final_summary(prompt, model_name, device="cuda" if torch.cuda.is_available() else "cpu"):
+    """
+    Given a prompt and model name, run summarization using local or OpenAI models.
+    """
+    if model_name in ["gpt-3.5", "gpt-4"]:
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant that summarizes narratives."},
+            {"role": "user", "content": prompt}
+        ]
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo" if model_name == "gpt-3.5" else "gpt-4",
+            messages=messages,
+            max_tokens=150,
+            temperature=0.7
+        )
+        return response.choices[0].message.content.strip()
+
+    else:
+        summarizer_fn, _, _ = load_summarizer(device, model_name)
+
+        if model_name in ["bart", "distilbart"]:
+            output = summarizer_fn(prompt, max_length=80, min_length=10, do_sample=False)
+            return output[0]["summary_text"].strip()
+        elif model_name in ["flan-t5", "bridgeBART"]:
+            output = summarizer_fn(prompt, max_length=80, min_length=10, do_sample=False)
+            return output[0]["generated_text"].strip()
+        else:
+            return summarizer_fn(prompt).strip().split(".")[0] + "."
+
+
+
 
 
 def main():
@@ -478,7 +553,38 @@ def main():
         print_video_summary(final_summary, total_stats)
 
         # Print out the story with group transitions
-        output_story_set(group_summaries, group_transitions, STORY_OUTPUT_MODE)
+        output_story_set(group_summaries, group_transitions, STORY_OUTPUT_MODE, grouped_captions)
+
+
+        # Create text versions of each story variant
+        original_blip_text = "\n".join([cap for group in grouped_captions for cap in group])
+        group_summary_text = "\n".join(group_summaries)
+        first_plus_transitions = group_summaries[0] + "\n" + "\n".join(t[2] for t in group_transitions)
+
+        full_narrative = ""
+        for i, summary in enumerate(group_summaries):
+            full_narrative += f"Summary {i+1}: {summary}\n"
+            if i < len(group_transitions):
+                full_narrative += f"Transition {i+1}: {group_transitions[i][2]}\n"
+
+        story_versions = {
+            "Original BLIP Captions": original_blip_text,
+            "Group Summaries Only": group_summary_text,
+            "First Summary + Transitions": first_plus_transitions,
+            "Full Interleaved Summary + Transitions": full_narrative
+        }
+
+        # Run final summarization
+        for model_name in FINAL_SUMMARIZER_MODELS:
+            print(f"\n{MAGENTA}=== Final Summaries using {model_name} ==={RESET}")
+            for label, text in story_versions.items():
+                prompt = f"Summarize the following narrative in one concise paragraph:\n\n{text.strip()}"
+                try:
+                    summary = get_final_summary(prompt, model_name)
+                    print(f"\n{CYAN}{label}:{RESET}\n{summary}")
+                except Exception as e:
+                    print(f"\n{RED}Failed to summarize with {model_name} for {label}: {e}{RESET}")
+
 
         # Optionally cluster final captions
         cluster_map = generate_cluster_map(captions, threshold=similarity_threshold)
