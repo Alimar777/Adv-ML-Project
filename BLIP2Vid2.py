@@ -37,6 +37,7 @@ STORY_OUTPUT_MODE           = "verbose"   # story | verbose
 
 FINAL_SUMMARIZER_MODELS = ["bart", "distilbart", "flan-t5", "gpt-3.5", "gpt-4"]
 
+LLM_SWITCH = False
 
 def load_summarizer(device, model_name):
     """
@@ -555,35 +556,35 @@ def main():
         # Print out the story with group transitions
         output_story_set(group_summaries, group_transitions, STORY_OUTPUT_MODE, grouped_captions)
 
+        if LLM_SWITCH:
+            # Create text versions of each story variant
+            original_blip_text = "\n".join([cap for group in grouped_captions for cap in group])
+            group_summary_text = "\n".join(group_summaries)
+            first_plus_transitions = group_summaries[0] + "\n" + "\n".join(t[2] for t in group_transitions)
 
-        # Create text versions of each story variant
-        original_blip_text = "\n".join([cap for group in grouped_captions for cap in group])
-        group_summary_text = "\n".join(group_summaries)
-        first_plus_transitions = group_summaries[0] + "\n" + "\n".join(t[2] for t in group_transitions)
+            full_narrative = ""
+            for i, summary in enumerate(group_summaries):
+                full_narrative += f"Summary {i+1}: {summary}\n"
+                if i < len(group_transitions):
+                    full_narrative += f"Transition {i+1}: {group_transitions[i][2]}\n"
 
-        full_narrative = ""
-        for i, summary in enumerate(group_summaries):
-            full_narrative += f"Summary {i+1}: {summary}\n"
-            if i < len(group_transitions):
-                full_narrative += f"Transition {i+1}: {group_transitions[i][2]}\n"
+            story_versions = {
+                "Original BLIP Captions": original_blip_text,
+                "Group Summaries Only": group_summary_text,
+                "First Summary + Transitions": first_plus_transitions,
+                "Full Interleaved Summary + Transitions": full_narrative
+            }
 
-        story_versions = {
-            "Original BLIP Captions": original_blip_text,
-            "Group Summaries Only": group_summary_text,
-            "First Summary + Transitions": first_plus_transitions,
-            "Full Interleaved Summary + Transitions": full_narrative
-        }
-
-        # Run final summarization
-        for model_name in FINAL_SUMMARIZER_MODELS:
-            print(f"\n{MAGENTA}=== Final Summaries using {model_name} ==={RESET}")
-            for label, text in story_versions.items():
-                prompt = f"Summarize the following narrative in one concise paragraph:\n\n{text.strip()}"
-                try:
-                    summary = get_final_summary(prompt, model_name)
-                    print(f"\n{CYAN}{label}:{RESET}\n{summary}")
-                except Exception as e:
-                    print(f"\n{RED}Failed to summarize with {model_name} for {label}: {e}{RESET}")
+            # Run final summarization
+            for model_name in FINAL_SUMMARIZER_MODELS:
+                print(f"\n{MAGENTA}=== Final Summaries using {model_name} ==={RESET}")
+                for label, text in story_versions.items():
+                    prompt = f"Summarize the following narrative in one concise paragraph:\n\n{text.strip()}"
+                    try:
+                        summary = get_final_summary(prompt, model_name)
+                        print(f"\n{CYAN}{label}:{RESET}\n{summary}")
+                    except Exception as e:
+                        print(f"\n{RED}Failed to summarize with {model_name} for {label}: {e}{RESET}")
 
 
         # Optionally cluster final captions
