@@ -1,50 +1,26 @@
 Frame Number,Image File,Caption,Processing Time (s)
-0,frame_0.jpg,a person holding an open book in their hands,0.21204710006713867
-29,frame_29.jpg,a person holding an open book in their hands,0.2140483856201172
-58,frame_58.jpg,a person holding an open book in their hands,0.21104764938354492
-87,frame_87.jpg,a person holding an open book with a quote,0.21104764938354492
-116,frame_116.jpg,a person holding an open book with a bookmark,0.22405028343200684
-145,frame_145.jpg,a person holding an open book in their hands,0.21004700660705566
-174,frame_174.jpg,a person holding a book with a page in it,0.2250509262084961
-203,frame_203.jpg,a person holding a book with a bookmark,0.2090470790863037
-232,frame_232.jpg,a person holding a book with a hand,0.19404363632202148
-261,frame_261.jpg,a person holding a book open to show the pages,0.22605156898498535
-290,frame_290.jpg,a person holding a book in their hands,0.19504356384277344
-319,frame_319.jpg,a person holding a book open to show the pages,0.225050687789917
-348,frame_348.jpg,a person holding a book with a bookmark,0.21004724502563477
-377,frame_377.jpg,a person holding a book in their hand,0.19504404067993164
-406,frame_406.jpg,a person holding an open book with a hand,0.21104717254638672
-435,frame_435.jpg,a person holding an open book with a hand,0.21104788780212402
+0,frame_0.jpg,a person holding an open book in their hands,0.4340987205505371
+29,frame_29.jpg,a person holding an open book in their hands,0.24205327033996582
+58,frame_58.jpg,a person holding an open book in their hands,0.236053466796875
+87,frame_87.jpg,a person holding an open book with a quote,0.23805451393127441
+116,frame_116.jpg,a person holding an open book with a bookmark,0.26606011390686035
+145,frame_145.jpg,a person holding an open book in their hands,0.26205992698669434
+174,frame_174.jpg,a person holding a book with a page in it,0.28206372261047363
+203,frame_203.jpg,a person holding a book with a bookmark,0.2540557384490967
+232,frame_232.jpg,a person holding a book with a hand,0.24905705451965332
+261,frame_261.jpg,a person holding a book open to show the pages,0.2940659523010254
+290,frame_290.jpg,a person holding a book in their hands,0.260059118270874
+319,frame_319.jpg,a person holding a book open to show the pages,0.2980685234069824
+348,frame_348.jpg,a person holding a book with a bookmark,0.25205516815185547
+377,frame_377.jpg,a person holding a book in their hand,0.24405503273010254
+406,frame_406.jpg,a person holding an open book with a hand,0.26405954360961914
+435,frame_435.jpg,a person holding an open book with a hand,0.2580583095550537
 
 Video Stats
 Total Frames,451
 Video Duration (s),15.551724137931034
-Mean Processing Time (s),0.2114851176738739
-Median Processing Time (s),0.21104764938354492
-Mode Processing Time (s),0.21104764938354492
-Summary Processing Time (s),1.1212520599365234
-Total Processing Time (s),4.505013942718506
-
-Summary,"Summarize the following scene descriptions from a video.
-Only include what is explicitly described. Do not add people, objects, or locations that are not mentioned.
-
-Captions:
-a person holding an open book in their hands
-a person holding an open book in their hands
-a person holding an open book in their hands
-a person holding an open book with a quote
-a person holding an open book with a bookmark
-a person holding an open book in their hands
-a person holding a book with a page in it
-a person holding a book with a bookmark
-a person holding a book with a hand
-a person holding a book open to show the pages
-a person holding a book in their hands
-a person holding a book open to show the pages
-a person holding a book with a bookmark
-a person holding a book in their hand
-a person holding an open book with a hand
-a person holding an open book with a hand
-
-Summary: 
-The video shows a person reading a textbook while holding it open with their open hand. The video also shows the person with an opened book, a pen, and a notepad."
+Mean Frame Processing Time,0.27087363600730896
+Median Frame Processing Time,0.25905871391296387
+Mode Frame Processing Time,0.4340987205505371
+Summary Processing Time,0.0
+Total Processing Time,4.441000938415527

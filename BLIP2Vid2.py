@@ -344,14 +344,22 @@ distilbart_summarizer = hf_pipeline(
 )
 def get_perplexity(sentence):
     from transformers import AutoModelForCausalLM, AutoTokenizer
-    model_name = "gpt2" 
-    model = AutoModelForCausalLM.from_pretrained(model_name)
+    model_name = "gpt2"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    inputs = tokenizer(sentence, return_tensors="pt").to(device)
-    outputs = model(**inputs, labels=inputs["input_ids"])
-    loss = outputs.loss
-    perplexity = torch.exp(loss)
+
+    inputs = tokenizer(sentence, return_tensors="pt")
+    inputs = {k: v.to(device) for k, v in inputs.items()}  # Move all to correct device
+
+    with torch.no_grad():
+        outputs = model(**inputs, labels=inputs["input_ids"])
+        loss = outputs.loss
+        perplexity = torch.exp(loss)
+
     return perplexity, loss
+
 def get_final_summary(prompt, model_name, device="cuda" if torch.cuda.is_available() else "cpu"):
     """
     Given a prompt and model name, run summarization using local or OpenAI models.
