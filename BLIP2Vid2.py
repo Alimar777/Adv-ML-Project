@@ -16,7 +16,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 # === Global Settings ===
-VIDEO_SELECTION_MODE        = "single"
+VIDEO_SELECTION_MODE        = "all" 
 SELECTED_VIDEO_INDEX        = 3
 DETAIL_MODE                 = True
 
@@ -37,7 +37,7 @@ STORY_OUTPUT_MODE           = "verbose"   # story | verbose
 
 FINAL_SUMMARIZER_MODELS = ["bart", "distilbart", "flan-t5", "gpt-3.5", "gpt-4"]
 
-LLM_SWITCH = False
+LLM_SWITCH = True
 
 def load_summarizer(device, model_name):
     """
@@ -197,6 +197,7 @@ def summarize_transition(prev_caption, curr_caption,
     """
     if model_choice == "majority":
         # fallback for 'majority'
+        print(f"Mjority")
         return f"The scene shifts from “{prev_caption}” to “{curr_caption}.”"
 
     prompt = prompt_template.format(prev=prev_caption, curr=curr_caption)
@@ -341,7 +342,16 @@ distilbart_summarizer = hf_pipeline(
     model="sshleifer/distilbart-cnn-12-6",
     device=0 if torch.cuda.is_available() else -1
 )
-
+def get_perplexity(sentence):
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    model_name = "gpt2" 
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    inputs = tokenizer(sentence, return_tensors="pt").to(device)
+    outputs = model(**inputs, labels=inputs["input_ids"])
+    loss = outputs.loss
+    perplexity = torch.exp(loss)
+    return perplexity, loss
 def get_final_summary(prompt, model_name, device="cuda" if torch.cuda.is_available() else "cpu"):
     """
     Given a prompt and model name, run summarization using local or OpenAI models.
@@ -360,22 +370,53 @@ def get_final_summary(prompt, model_name, device="cuda" if torch.cuda.is_availab
             max_tokens=150,
             temperature=0.7
         )
-        return response.choices[0].message.content.strip()
+        description = response.choices[0].message.content.strip()
+        perplexity, loss = get_perplexity(description)
+        return description, perplexity, loss
 
     else:
         summarizer_fn, _, _ = load_summarizer(device, model_name)
 
         if model_name in ["bart", "distilbart"]:
             output = summarizer_fn(prompt, max_length=80, min_length=10, do_sample=False)
-            return output[0]["summary_text"].strip()
+            description = output[0]["summary_text"].strip()
+
+            perplexity, loss = get_perplexity(description)
+            return description, perplexity, loss
         elif model_name in ["flan-t5", "bridgeBART"]:
             output = summarizer_fn(prompt, max_length=80, min_length=10, do_sample=False)
-            return output[0]["generated_text"].strip()
+            description = output[0]["generated_text"].strip()
+            perplexity, loss = get_perplexity(description)
+            return description, perplexity, loss
         else:
-            return summarizer_fn(prompt).strip().split(".")[0] + "."
+            output = summarizer_fn(prompt)
+            description = output.strip().split(".")[0] + "."
+            perplexity, loss = get_perplexity(description)
+            return description, perplexity, loss
 
 
+def sklearn_metrics(scores, threshold):
+    from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+    pred_labels = [1 if score >= threshold else 0 for score in scores]
+    true_labels = [1] * len(pred_labels)
+    precision = precision_score(true_labels, pred_labels)
+    recall = recall_score(true_labels, pred_labels)
+    f1 = f1_score(true_labels, pred_labels)
+    accuracy = accuracy_score(true_labels, pred_labels)
+    print(f"Precision: {precision:.4f}")
+    print(f"Accuracy: {accuracy:.4f}")
+    print(f"Recall: {recall:.4f}")
+    print(f"F1-Score: {f1:.4f}")
+    return precision, accuracy, recall, f1
 
+
+def calculate_similarity_transformer(predicted_label, actual_caption): #captures context, semantic
+    model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")  
+    embedding1 = model.encode(predicted_label, convert_to_tensor=True)
+    embedding2 = model.encode(actual_caption, convert_to_tensor=True)
+    similarity_score = util.cos_sim(embedding1, embedding2)
+    print(f"Similarity Score: {similarity_score.item():.4f}")
+    return similarity_score.item()
 
 
 def main():
@@ -392,7 +433,7 @@ def main():
 
     global summarizer, tokenizer, model
     global trans_summarizer, trans_tokenizer, trans_model
-
+    print("In main")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base", use_fast=True)
     blip_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(device)
@@ -413,7 +454,9 @@ def main():
     os.makedirs(BLIP_OUTPUT_DIR, exist_ok=True)
 
     video_indices = range(1, 11) if VIDEO_SELECTION_MODE == "all" else [SELECTED_VIDEO_INDEX]
-
+    all_perplexities = []
+    all_losses = []
+    all_summaries = []
     for i in video_indices:
         video_filename = f"{i:02d}.mp4"
         video_path = os.path.join(VIDEO_PATH, video_filename)
@@ -449,7 +492,7 @@ def main():
             caption = generate_caption(frame, processor, blip_model, device)
             end_time = time.time()
 
-            captions.append(caption)
+            captions.append(caption) #blip
             frame_times.append(end_time - start_time)
             csv_data.append([frame_number, f"frame_{frame_number}.jpg", caption, end_time - start_time])
 
@@ -468,7 +511,7 @@ def main():
             last_embedding = new_embedding
 
 
-        if current_group:
+        if current_group:#blip
             grouped_captions.append(current_group)
 
         print(f"\n{MAGENTA}=== Grouped Caption Sets (Semantic Clusters) ==={RESET}")
@@ -498,6 +541,7 @@ def main():
             for prev, curr in zip(group_summaries[:-1], group_summaries[1:]):
                 # If TRANSITION_MODEL is generative, call summarize_transition
                 if TRANSITION_MODEL in ["gpt2", "tinyllama", "flan-t5", "bart", "distilbart", "bridgeBART"]:
+                    print(f" Transition model {TRANSITION_MODEL}")
                     bridge = summarize_transition(prev, curr, trans_summarizer, TRANSITION_MODEL)
                 else:
                     # "majority" fallback
@@ -555,7 +599,7 @@ def main():
 
         # Print out the story with group transitions
         output_story_set(group_summaries, group_transitions, STORY_OUTPUT_MODE, grouped_captions)
-
+        
         if LLM_SWITCH:
             # Create text versions of each story variant
             original_blip_text = "\n".join([cap for group in grouped_captions for cap in group])
@@ -574,14 +618,25 @@ def main():
                 "First Summary + Transitions": first_plus_transitions,
                 "Full Interleaved Summary + Transitions": full_narrative
             }
-
+########################################################################################################
             # Run final summarization
+
+            perplexities = []
+            losses = []
+            model_names = []
+            summaries = []
             for model_name in FINAL_SUMMARIZER_MODELS:
                 print(f"\n{MAGENTA}=== Final Summaries using {model_name} ==={RESET}")
                 for label, text in story_versions.items():
                     prompt = f"Summarize the following narrative in one concise paragraph:\n\n{text.strip()}"
                     try:
-                        summary = get_final_summary(prompt, model_name)
+                        summary, perplexity, loss = get_final_summary(prompt, model_name)
+                        if label == "Full Interleaved Summary + Transitions":
+                            print(f"Perplexity {perplexity}, and loss {loss} of {model_name}")
+                            perplexities.append(perplexity)
+                            model_names.append(model_name)
+                            losses.append(loss)
+                            summaries.append(summary)
                         print(f"\n{CYAN}{label}:{RESET}\n{summary}")
                     except Exception as e:
                         print(f"\n{RED}Failed to summarize with {model_name} for {label}: {e}{RESET}")
@@ -593,7 +648,88 @@ def main():
                            method="both", threshold=similarity_threshold)
         animate_caption_clusters(captions, cluster_map, summary_output_dir, video_filename, method='pca')
         animate_caption_clusters(captions, cluster_map, summary_output_dir, video_filename, method='tsne', save_frames=True)
+    
+        #list of lists for each model on each vid
+        all_perplexities.append(perplexities)
+        all_losses.append(losses)
+        all_summaries.append(summaries)
+    perplexity_avgs = []
+    loss_avgs = []
+    model_summaries = []
+    for i, name in enumerate(model_names):
+        model_perplexity = [y[i] for y in all_perplexities]
+        model_loss = [y[i] for y in all_losses]
+        print(f"avg per{model_perplexity}")
+        avg_perplexity =np.mean([p.detach().cpu().numpy() for p in model_perplexity])
+        avg_loss = np.mean([p.detach().cpu().numpy() for p in model_loss])
+        model_summary =  [y[i] for y in all_summaries]
+        print(f"For Model {name}: Perplex: {avg_perplexity}, Loss: {avg_loss}\n Summary: {model_summary}")
+        perplexity_avgs.append(avg_perplexity)
+        loss_avgs.append(avg_loss)
+        model_summaries.append(model_summary)
+    #Metrics
+    captions = ["A woman makes a flower display.", "A person flips through a book.",
+        "A dog walks down path with red flowers and a man follows.", 
+        "A horse runs in dirt corral.", "People walk in indian fish market.",
+            "A person buys produce in a market.", 
+        "A person plays piano.",
+            "People in work in an office.", 
+            "People ice skate in front of building.",
+            "A man in a red shirt kicks soccar ball in a feild.", 
+        "A woman scans items in a lab. "]
+    avg_scores = []
+    avg_accuracy = []
+    threshold = 0.3
+    for j, model in enumerate(model_summaries):
+        scores = []
+        for i, pred in enumerate(model):
+            print(f"For model {model_names[j]}: Actual:> {captions[i]}\n Predicitons: {pred}")
+            score = calculate_similarity_transformer(pred, captions[i])
+            scores.append(score)
+        print(f"{model} Metrics:")
+        mean_similarity = np.mean(scores)
+        avg_scores.append(mean_similarity)
+        print(f"Average Similarity Score: {mean_similarity:.4f}")
+        precision, accuracy, recall,f1 = sklearn_metrics(scores, threshold) 
+        avg_accuracy.append(accuracy)
 
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(model_names, avg_accuracy, color='skyblue', edgecolor='black')
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, height + 0.01, f'{height:.2f}', ha='center', fontsize=12)
 
+    plt.title('Model Accuracy Comparison', fontsize=16)
+    plt.ylabel('Accuracy', fontsize=14)
+    plt.xlabel('Model', fontsize=14)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    plt.show()
+
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(model_names, avg_scores, color='skyblue', edgecolor='black')
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, height + 0.01, f'{height:.2f}', ha='center', fontsize=12)
+
+    plt.title('Model Cosine Similarity Comparison', fontsize=16)
+    plt.ylabel('Cosine Similarity', fontsize=14)
+    plt.xlabel('Model', fontsize=14)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    plt.show()
+
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(model_names, perplexity_avgs, color='skyblue', edgecolor='black')
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width() / 2, height + 0.01, f'{height:.2f}', ha='center', fontsize=12)
+
+    plt.title('Model Fluency Comparison', fontsize=16)
+    plt.ylabel('Fluency Difficulty', fontsize=14)
+    plt.xlabel('Model', fontsize=14)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    plt.show()
 if __name__ == "__main__":
     main()
